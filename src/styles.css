@@ -14,6 +14,8 @@
 	--surface: rgba(255, 255, 255, 0.92);
 	--shadow: 0 10px 30px rgba(31, 41, 55, 0.08);
 	--soft-shadow: 0 5px 18px rgba(31, 41, 55, 0.06);
+	--shell-width: 1536px;
+	--page-gutter: 56px;
 }
 
 * {
@@ -79,10 +81,10 @@ input:focus-visible {
 	z-index: 20;
 	height: 70px;
 	display: grid;
-	grid-template-columns: 240px minmax(360px, 1fr) 270px;
+	grid-template-columns: minmax(220px, 260px) minmax(420px, 1fr) minmax(240px, 300px);
 	align-items: center;
-	gap: 18px;
-	padding: 0 32px;
+	gap: 24px;
+	padding: 0 max(32px, calc((100vw - var(--shell-width)) / 2 + 32px));
 	border-bottom: 1px solid var(--line);
 	background: rgba(255, 255, 255, 0.92);
 	backdrop-filter: blur(16px);
@@ -116,7 +118,7 @@ input:focus-visible {
 	height: 100%;
 	display: flex;
 	justify-content: center;
-	gap: clamp(12px, 2.2vw, 34px);
+	gap: clamp(16px, 2.2vw, 34px);
 }
 
 .topbar nav button {
@@ -124,7 +126,7 @@ input:focus-visible {
 	align-items: center;
 	gap: 8px;
 	height: 100%;
-	padding: 0 2px;
+	padding: 0 4px;
 	border: 0;
 	border-bottom: 4px solid transparent;
 	background: transparent;
@@ -139,8 +141,10 @@ input:focus-visible {
 }
 
 .chrome-floating .topbar {
-	width: min(1536px, calc(100% - 56px));
+	width: min(var(--shell-width), calc(100% - var(--page-gutter)));
+	grid-template-columns: minmax(220px, 260px) minmax(420px, 1fr) minmax(240px, 300px);
 	margin: 14px auto 0;
+	padding: 0 26px;
 	border: 1px solid var(--line);
 	border-radius: 8px;
 	box-shadow: var(--soft-shadow);
@@ -378,7 +382,7 @@ input:focus-visible {
 }
 
 main {
-	width: min(1536px, calc(100% - 56px));
+	width: min(var(--shell-width), calc(100% - var(--page-gutter)));
 	margin: 0 auto;
 	flex: 1 0 auto;
 	padding-bottom: 20px;
@@ -2117,7 +2121,7 @@ main {
 
 footer {
 	flex: 0 0 auto;
-	width: min(1536px, calc(100% - 56px));
+	width: min(var(--shell-width), calc(100% - var(--page-gutter)));
 	margin: 0 auto 18px;
 	color: #596579;
 	font-size: 14px;
@@ -2245,10 +2249,24 @@ footer strong {
 		padding: 14px 20px 0;
 	}
 
+	.chrome-floating .topbar {
+		width: min(100% - 56px, var(--shell-width));
+		grid-template-columns: 1fr;
+		height: auto;
+		padding: 14px 20px 0;
+	}
+
 	.topbar nav {
 		order: 3;
+		width: 100%;
+		padding-top: 8px;
 		justify-content: flex-start;
 		overflow-x: auto;
+		scrollbar-width: none;
+	}
+
+	.topbar nav::-webkit-scrollbar {
+		display: none;
 	}
 
 	.header-actions {
@@ -2477,6 +2495,7 @@ footer strong {
 	.chrome-floating .topbar {
 		width: min(100% - 24px, 1536px);
 		margin-top: 10px;
+		padding: 10px 12px 8px;
 	}
 
 	.footer-inner {
