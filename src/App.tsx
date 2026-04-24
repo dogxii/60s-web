@@ -18,12 +18,12 @@ import {
 	Github,
 	Globe2,
 	Home,
+	Image as ImageIcon,
 	KeyRound,
 	Languages,
 	LayoutGrid,
 	Loader2,
 	MapPin,
-	Image as ImageIcon,
 	Newspaper,
 	Palette,
 	QrCode,
@@ -36,10 +36,10 @@ import {
 	Sparkles,
 	Sun,
 	TerminalSquare,
-	WalletCards,
-	Wind,
 	Upload,
 	UserRound,
+	WalletCards,
+	Wind,
 	X,
 } from "lucide-react";
 import type { CSSProperties, ReactNode } from "react";
@@ -205,7 +205,7 @@ const toolDefinitions: ToolDefinition[] = [
 const EPIC_COVER_PLACEHOLDER =
 	"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='172' height='116' viewBox='0 0 172 116'><rect width='172' height='116' rx='12' fill='%23f3f6f8'/><rect x='16' y='16' width='140' height='84' rx='10' fill='%23e7eef3'/><path d='M36 82l24-26 18 18 26-30 32 38H36z' fill='%23c9d6df'/><circle cx='58' cy='44' r='9' fill='%23d7e3ea'/><text x='86' y='104' text-anchor='middle' font-size='12' fill='%23667885' font-family='Arial, sans-serif'>Epic Cover</text></svg>";
 const API_REPO_URL = "https://github.com/vikiboss/60s";
-const WEB_REPO_URL = "https://github.com/dog234/60s-web";
+const WEB_REPO_URL = "https://github.com/dogxii/60s-web";
 
 const categoryLabels: Record<EndpointDefinition["category"], string> = {
 	periodic: "周期资讯",
@@ -316,13 +316,14 @@ export function App() {
 	const [query, setQuery] = useState("");
 	const [activePage, setActivePage] = useState<PageId>("home");
 	const [activeTool, setActiveTool] = useState<ToolId>("translate");
-	const [searchProvider, setSearchProvider] = useState<SearchProviderId>(() =>
-		readStoredValue(STORAGE_KEYS.searchProvider, "site") as SearchProviderId,
+	const [searchProvider, setSearchProvider] = useState<SearchProviderId>(
+		() =>
+			readStoredValue(STORAGE_KEYS.searchProvider, "site") as SearchProviderId,
 	);
-	const [chromeTheme, setChromeTheme] = useState<ChromeTheme>(() =>
-		readStoredValue(STORAGE_KEYS.chromeTheme, "classic") as ChromeTheme,
+	const [chromeTheme, setChromeTheme] = useState<ChromeTheme>(
+		() => readStoredValue(STORAGE_KEYS.chromeTheme, "classic") as ChromeTheme,
 	);
-	const [hotTab, setHotTab] = useState(hotTabs[0]);
+	const [hotTab, setHotTab] = useState(hotTabs[1]);
 	const [avatar, setAvatar] = useState<AvatarState>(() =>
 		readStoredJson(STORAGE_KEYS.avatar, { mode: "default" }),
 	);
@@ -484,7 +485,11 @@ export function App() {
 			setActivePage("tools");
 			return;
 		}
-		window.open(buildSearchTarget(searchProvider, keyword), "_blank", "noopener,noreferrer");
+		window.open(
+			buildSearchTarget(searchProvider, keyword),
+			"_blank",
+			"noopener,noreferrer",
+		);
 	};
 
 	return (
@@ -520,9 +525,7 @@ export function App() {
 									: `输入关键词，用 ${searchProviders.find((item) => item.id === searchProvider)?.label} 搜索...`
 							}
 						/>
-						<button type="submit">
-							搜索
-						</button>
+						<button type="submit">搜索</button>
 					</form>
 					<div className="search-providers" aria-label="搜索目的地">
 						{searchProviders.map((provider) => (
@@ -2281,7 +2284,8 @@ function getQqAvatarUrl(qq: string) {
 
 function getAvatarSrc(avatar: AvatarState) {
 	if (avatar.mode === "upload" && avatar.src) return avatar.src;
-	if (avatar.mode === "qq" && avatar.qq) return avatar.src || getQqAvatarUrl(avatar.qq);
+	if (avatar.mode === "qq" && avatar.qq)
+		return avatar.src || getQqAvatarUrl(avatar.qq);
 	return "/favicon.png";
 }
 
