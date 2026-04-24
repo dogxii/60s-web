@@ -93,6 +93,7 @@ type PageId = "home" | "hot" | "news" | "weather" | "tools" | "settings";
 type ToolId = "translate" | "qrcode" | "password" | "palette";
 type SearchProviderId = "site" | "bing" | "google" | "chatgpt" | "doubao";
 type WallpaperMode = "default" | "mint" | "paper" | "dawn" | "custom";
+type ChromeTheme = "classic" | "floating" | "minimal";
 type AvatarState = {
 	mode: "default" | "upload" | "qq";
 	src?: string;
@@ -120,6 +121,7 @@ const STORAGE_KEYS = {
 	avatar: "60s-web:avatar",
 	searchProvider: "60s-web:search-provider",
 	wallpaper: "60s-web:wallpaper",
+	chromeTheme: "60s-web:chrome-theme",
 } as const;
 
 const nav = [
@@ -161,6 +163,16 @@ const wallpaperOptions: Array<{
 	{ id: "paper", label: "纸面", sub: "干净留白" },
 	{ id: "dawn", label: "晨光", sub: "暖色氛围" },
 	{ id: "custom", label: "自定义", sub: "本地图片" },
+];
+
+const chromeThemes: Array<{
+	id: ChromeTheme;
+	label: string;
+	sub: string;
+}> = [
+	{ id: "classic", label: "经典", sub: "固定栏" },
+	{ id: "floating", label: "悬浮", sub: "浮层卡片" },
+	{ id: "minimal", label: "极简", sub: "轻边界" },
 ];
 
 const toolDefinitions: ToolDefinition[] = [
@@ -307,6 +319,9 @@ export function App() {
 	const [searchProvider, setSearchProvider] = useState<SearchProviderId>(() =>
 		readStoredValue(STORAGE_KEYS.searchProvider, "site") as SearchProviderId,
 	);
+	const [chromeTheme, setChromeTheme] = useState<ChromeTheme>(() =>
+		readStoredValue(STORAGE_KEYS.chromeTheme, "classic") as ChromeTheme,
+	);
 	const [hotTab, setHotTab] = useState(hotTabs[0]);
 	const [avatar, setAvatar] = useState<AvatarState>(() =>
 		readStoredJson(STORAGE_KEYS.avatar, { mode: "default" }),
@@ -439,6 +454,10 @@ export function App() {
 	}, [searchProvider]);
 
 	useEffect(() => {
+		writeStoredValue(STORAGE_KEYS.chromeTheme, chromeTheme);
+	}, [chromeTheme]);
+
+	useEffect(() => {
 		writeStoredJson(STORAGE_KEYS.wallpaper, wallpaper);
 	}, [wallpaper]);
 
@@ -469,7 +488,10 @@ export function App() {
 	};
 
 	return (
-		<div className="app-shell" style={getWallpaperStyle(wallpaper)}>
+		<div
+			className={`app-shell chrome-${chromeTheme}`}
+			style={getWallpaperStyle(wallpaper)}
+		>
 			<Header
 				city={city}
 				setCity={setCity}
@@ -624,6 +646,8 @@ export function App() {
 							reloadAll={reloadAll}
 							wallpaper={wallpaper}
 							setWallpaper={setWallpaper}
+							chromeTheme={chromeTheme}
+							setChromeTheme={setChromeTheme}
 						/>
 					</section>
 				)}
@@ -1708,6 +1732,8 @@ function SettingsPanel({
 	reloadAll,
 	wallpaper,
 	setWallpaper,
+	chromeTheme,
+	setChromeTheme,
 	compact = false,
 }: {
 	apiBase: string;
@@ -1717,6 +1743,8 @@ function SettingsPanel({
 	reloadAll: () => void;
 	wallpaper?: WallpaperState;
 	setWallpaper?: (value: WallpaperState) => void;
+	chromeTheme?: ChromeTheme;
+	setChromeTheme?: (value: ChromeTheme) => void;
 	compact?: boolean;
 }) {
 	const wallpaperInputRef = useRef<HTMLInputElement | null>(null);
@@ -1770,7 +1798,36 @@ function SettingsPanel({
 				</button>
 			</div>
 			{!compact && wallpaper && setWallpaper && (
-				<div className="wallpaper-settings">
+				<div className="appearance-settings">
+					{chromeTheme && setChromeTheme && (
+						<>
+							<div className="settings-subtitle">
+								<span>
+									<LayoutGrid size={18} /> 外壳主题
+								</span>
+								<small>同步调整顶部导航和底部状态栏的样式</small>
+							</div>
+							<div className="chrome-theme-grid">
+								{chromeThemes.map((theme) => (
+									<button
+										type="button"
+										key={theme.id}
+										className={chromeTheme === theme.id ? "active" : ""}
+										onClick={() => setChromeTheme(theme.id)}
+									>
+										<i className={`chrome-preview chrome-preview-${theme.id}`}>
+											<span />
+											<b />
+										</i>
+										<span>
+											<b>{theme.label}</b>
+											<small>{theme.sub}</small>
+										</span>
+									</button>
+								))}
+							</div>
+						</>
+					)}
 					<div className="settings-subtitle">
 						<span>
 							<ImageIcon size={18} /> 壁纸
