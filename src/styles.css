@@ -441,6 +441,8 @@ main {
 	margin: 0 auto;
 	flex: 1 0 auto;
 	padding-bottom: 20px;
+	min-width: 0;
+	overflow-x: clip;
 }
 
 .search-band {
@@ -589,6 +591,7 @@ main {
 .home-right {
 	display: grid;
 	gap: 20px;
+	min-width: 0;
 }
 
 .home-right-split {
@@ -602,6 +605,7 @@ main {
 	display: grid;
 	gap: 20px;
 	padding-bottom: 28px;
+	min-width: 0;
 }
 
 .single-page {
@@ -639,6 +643,9 @@ main {
 	border-radius: 8px;
 	background: var(--surface);
 	box-shadow: var(--soft-shadow);
+	max-width: 100%;
+	min-width: 0;
+	overflow: hidden;
 }
 
 .card-title,
@@ -790,6 +797,9 @@ main {
 
 .weather-body {
 	padding: 0 18px 18px;
+	max-width: 100%;
+	min-width: 0;
+	overflow: hidden;
 }
 
 .weather-card.home-weather .weather-body {
@@ -819,6 +829,7 @@ main {
 	display: inline-flex;
 	align-items: center;
 	gap: 14px;
+	min-width: 0;
 }
 
 .weather-status {
@@ -1069,6 +1080,8 @@ main {
 	grid-template-columns: repeat(auto-fit, minmax(72px, 1fr));
 	gap: 8px;
 	margin-top: 14px;
+	max-width: 100%;
+	min-width: 0;
 }
 
 .weather-card.home-weather .forecast-row {
@@ -1281,6 +1294,7 @@ main {
 	display: grid;
 	grid-template-columns: repeat(4, minmax(0, 1fr));
 	gap: 14px;
+	min-width: 0;
 }
 
 .hourly-card {
@@ -1293,6 +1307,8 @@ main {
 	gap: 10px;
 	padding: 0 18px;
 	overflow-x: auto;
+	max-width: 100%;
+	min-width: 0;
 }
 
 .hourly-item {
@@ -2714,7 +2730,9 @@ footer strong {
 	}
 
 	.weather-main {
-		grid-template-columns: 76px auto;
+		grid-template-columns: 68px minmax(0, 1fr);
+		gap: 12px;
+		min-height: auto;
 	}
 
 	.weather-main > div:last-child {
@@ -2722,15 +2740,39 @@ footer strong {
 	}
 
 	.weather-art {
-		width: 70px;
-		height: 70px;
+		width: 64px;
+		height: 64px;
 	}
 
 	.temperature strong {
-		font-size: 44px;
+		font-size: 42px;
 	}
 
-	.weather-metrics,
+	.weather-body {
+		padding: 0 14px 14px;
+	}
+
+	.weather-actions {
+		width: 100%;
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) auto;
+		gap: 8px;
+	}
+
+	.mini-input,
+	.mini-input input {
+		width: 100%;
+		min-width: 0;
+	}
+
+	.page-city {
+		width: 100%;
+	}
+
+	.page-city input {
+		width: 100%;
+	}
+
 	.market-grid,
 	.tool-grid,
 	.settings-grid,
@@ -2750,14 +2792,45 @@ footer strong {
 		grid-template-columns: 1fr;
 	}
 
+	.weather-metrics,
+	.weather-detail-grid {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+
 	.forecast-row {
 		display: flex;
 		overflow-x: auto;
+		max-width: 100%;
+		width: 100%;
 		padding-bottom: 4px;
+		scrollbar-width: none;
+	}
+
+	.forecast-row::-webkit-scrollbar {
+		display: none;
 	}
 
 	.forecast-day {
-		min-width: 82px;
+		flex: 0 0 78px;
+		min-width: 78px;
+	}
+
+	.hourly-row {
+		display: flex;
+		width: 100%;
+		max-width: 100%;
+		padding: 0 14px 14px;
+		scrollbar-width: none;
+	}
+
+	.hourly-row::-webkit-scrollbar {
+		display: none;
+	}
+
+	.hourly-item {
+		flex: 0 0 76px;
+		min-width: 76px;
+		min-height: 104px;
 	}
 
 	.rank-list {
