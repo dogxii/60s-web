@@ -530,8 +530,6 @@ export function App() {
 			style={getWallpaperStyle(wallpaper, colorTheme)}
 		>
 			<Header
-				city={city}
-				setCity={setCity}
 				activePage={activePage}
 				setActivePage={setActivePage}
 				avatar={avatar}
@@ -644,13 +642,7 @@ export function App() {
 					/>
 				)}
 				{activePage === "hot" && (
-					<HotPage
-						apiBase={apiBase}
-						active={hotTab}
-						setActive={setHotTab}
-						hot={hot}
-						hotItems={hotItems}
-					/>
+					<HotPage apiBase={apiBase} />
 				)}
 				{activePage === "news" && <NewsPage apiBase={apiBase} daily={daily} />}
 				{activePage === "weather" && (
@@ -678,6 +670,8 @@ export function App() {
 						<SettingsPanel
 							apiBase={apiBase}
 							setApiBase={setApiBase}
+							city={city}
+							setCity={setCity}
 							settings={settings}
 							setSettings={setSettings}
 							reloadAll={reloadAll}
@@ -792,8 +786,6 @@ function HomePage({
 }
 
 function Header({
-	city,
-	setCity,
 	activePage,
 	setActivePage,
 	avatar,
@@ -801,8 +793,6 @@ function Header({
 	colorTheme,
 	setColorTheme,
 }: {
-	city: string;
-	setCity: (city: string) => void;
 	activePage: PageId;
 	setActivePage: (page: PageId) => void;
 	avatar: AvatarState;
@@ -910,14 +900,6 @@ function Header({
 				})}
 			</nav>
 			<div className="header-actions">
-				<label className="city-select">
-					<MapPin size={17} />
-					<input
-						value={city}
-						onChange={(event) => setCity(event.target.value)}
-						aria-label="默认城市"
-					/>
-				</label>
 				<button
 					className="theme-toggle"
 					type="button"
@@ -1044,16 +1026,8 @@ function SearchResults({
 
 function HotPage({
 	apiBase,
-	active,
-	setActive,
-	hot,
-	hotItems,
 }: {
 	apiBase: string;
-	active: (typeof hotTabs)[number];
-	setActive: (tab: (typeof hotTabs)[number]) => void;
-	hot: ApiState<unknown> & { reload: () => void };
-	hotItems: HotItem[];
 }) {
 	const hotBoards = [
 		{ title: "微博热搜", path: "/weibo" },
@@ -1072,16 +1046,8 @@ function HotPage({
 				<span>
 					<Flame size={24} /> 热榜广场
 				</span>
-				<small>多个热榜平铺展示，顶部标签仍可切换首页热榜数据源</small>
+				<small>聚合多个榜单源，打开页面即可纵览，不再重复切换。</small>
 			</div>
-			<HotBoard
-				tabs={hotTabs}
-				active={active.id}
-				setActive={setActive}
-				state={hot}
-				items={hotItems}
-				wide
-			/>
 			<div className="multi-board-grid">
 				{hotBoards.map((board) => (
 					<HotMiniBoard
@@ -1807,6 +1773,8 @@ function QuoteCard({ data }: { data?: unknown }) {
 function SettingsPanel({
 	apiBase,
 	setApiBase,
+	city,
+	setCity,
 	settings,
 	setSettings,
 	reloadAll,
@@ -1820,6 +1788,8 @@ function SettingsPanel({
 }: {
 	apiBase: string;
 	setApiBase: (value: string) => void;
+	city?: string;
+	setCity?: (value: string) => void;
 	settings: SettingsState;
 	setSettings: (value: SettingsState) => void;
 	reloadAll: () => void;
@@ -1877,6 +1847,16 @@ function SettingsPanel({
 						onChange={(event) => setApiBase(event.target.value)}
 					/>
 				</label>
+				{!compact && city !== undefined && setCity && (
+					<label className="api-base city-setting">
+						默认城市
+						<input
+							value={city}
+							onChange={(event) => setCity(event.target.value)}
+							placeholder="例如 上海"
+						/>
+					</label>
+				)}
 				<button className="primary-subtle" onClick={reloadAll}>
 					<RefreshCw size={17} /> 刷新全部模块
 				</button>
