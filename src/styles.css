@@ -594,6 +594,10 @@ main {
 	min-width: 0;
 }
 
+.home-card-slot {
+	min-width: 0;
+}
+
 .home-right-split {
 	display: grid;
 	grid-template-columns: minmax(0, 1.5fr) minmax(260px, 0.82fr);
@@ -1437,7 +1441,8 @@ main {
 	box-shadow: var(--soft-shadow);
 }
 
-.home-right > .quote-card {
+.home-right > .quote-card,
+.home-right > .home-card-slot > .quote-card {
 	align-self: stretch;
 }
 
