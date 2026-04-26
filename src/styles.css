@@ -587,18 +587,30 @@ main {
 	align-items: start;
 }
 
-.home-reorder-hint {
+.home-editbar {
 	grid-column: 1 / -1;
-	justify-self: center;
+	justify-self: end;
 	margin-bottom: -4px;
-	padding: 7px 12px;
+}
+
+.home-editbar button {
+	height: 32px;
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 0 12px;
 	border: 1px solid rgba(15, 155, 142, 0.16);
 	border-radius: 999px;
 	background: rgba(255, 255, 255, 0.66);
-	color: var(--muted);
+	color: var(--accent-dark);
 	font-size: 12px;
 	font-weight: 800;
 	backdrop-filter: blur(12px);
+}
+
+.home-editbar button.active {
+	background: rgba(15, 155, 142, 0.12);
+	border-color: rgba(15, 155, 142, 0.28);
 }
 
 .home-left,
@@ -611,15 +623,18 @@ main {
 .home-card-slot {
 	min-width: 0;
 	position: relative;
-	cursor: grab;
-	touch-action: pan-y;
-	user-select: none;
 	transition:
 		opacity 0.18s ease,
 		transform 0.18s ease;
 }
 
-.home-card-slot:active {
+.home-card-slot.is-editable {
+	cursor: grab;
+	touch-action: pan-y;
+	user-select: none;
+}
+
+.home-card-slot.is-editable:active {
 	cursor: grabbing;
 }
 
@@ -629,7 +644,7 @@ main {
 	transform: scale(0.985);
 }
 
-.home-drop-column.is-reordering {
+.home-drop-column.is-editing {
 	user-select: none;
 }
 
@@ -665,7 +680,7 @@ main {
 		background 0.18s ease;
 }
 
-.home-drop-column.is-reordering .home-drop-zone {
+.home-drop-column.is-editing.is-reordering .home-drop-zone {
 	min-height: 48px;
 	border-color: rgba(15, 155, 142, 0.28);
 	background: rgba(15, 155, 142, 0.06);
@@ -2643,9 +2658,15 @@ footer strong {
 	color: var(--accent-dark);
 }
 
-.theme-dark .home-reorder-hint {
+.theme-dark .home-editbar button {
 	background: rgba(14, 29, 27, 0.66);
 	border-color: rgba(55, 216, 197, 0.18);
+	color: var(--accent-dark);
+}
+
+.theme-dark .home-editbar button.active {
+	background: rgba(55, 216, 197, 0.12);
+	border-color: rgba(55, 216, 197, 0.3);
 }
 
 .theme-dark .home-card-actions button,

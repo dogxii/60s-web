@@ -8,6 +8,7 @@ import {
 	type WeatherForecast,
 	type WeatherRealtime,
 } from "../api";
+import { Check, PencilLine } from "lucide-react";
 import {
 	getHomeCards,
 	moveHomeCard,
@@ -86,6 +87,7 @@ export function HomePage({
 	setSettings,
 	reloadAll,
 }: HomePageProps) {
+	const [isEditing, setIsEditing] = useState(false);
 	const [draggedCard, setDraggedCard] = useState<{
 		cardId: HomeCardId;
 		column: HomeCardColumn;
@@ -138,6 +140,7 @@ export function HomePage({
 		cardId: HomeCardId,
 		column: HomeCardColumn,
 	) => {
+		if (!isEditing) return;
 		const target = event.target as HTMLElement;
 		if (
 			event.pointerType === "mouse" ||
@@ -202,6 +205,7 @@ export function HomePage({
 		cardId: HomeCardId,
 		column: HomeCardColumn,
 	) => {
+		if (!isEditing) return;
 		const target = event.target as HTMLElement;
 		if (event.button !== 0 || isInteractiveDragTarget(target)) return;
 		const startX = event.clientX;
@@ -316,8 +320,8 @@ export function HomePage({
 		return (
 			<div
 				className={`${className} home-drop-column ${
-					draggedCard ? "is-reordering" : ""
-				}`}
+					isEditing ? "is-editing" : ""
+				} ${draggedCard ? "is-reordering" : ""}`}
 				aria-label={label}
 				data-home-column={column}
 			>
@@ -330,7 +334,7 @@ export function HomePage({
 						<div
 							className={`home-card-slot ${isDragging ? "is-dragging" : ""} ${
 								isDropTarget ? "is-drop-target" : ""
-							}`}
+							} ${isEditing ? "is-editable" : ""}`}
 							key={card.id}
 							aria-grabbed={isDragging}
 							data-home-card-id={card.id}
@@ -356,17 +360,26 @@ export function HomePage({
 							: ""
 					}`}
 					data-home-column={column}
-				>
-					拖到这里放在{label}末尾
-				</div>
+					aria-label={`放到${label}末尾`}
+				/>
 			</div>
 		);
 	};
 
 	return (
-		<section className="home-layout">
-			<div className="home-reorder-hint">
-				按住卡片拖动可调整首页顺序，也可以拖到另一栏
+		<section className={`home-layout ${isEditing ? "is-editing" : ""}`}>
+			<div className="home-editbar">
+				<button
+					type="button"
+					className={isEditing ? "active" : ""}
+					onClick={() => {
+						if (isEditing) resetDragState();
+						setIsEditing(!isEditing);
+					}}
+				>
+					{isEditing ? <Check size={15} /> : <PencilLine size={15} />}
+					{isEditing ? "完成" : "编辑"}
+				</button>
 			</div>
 			{renderColumn("left", "home-left", "主阅读栏")}
 			{renderColumn("right", "home-right", "辅助信息栏")}

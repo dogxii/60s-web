@@ -154,7 +154,6 @@ export function SettingsPanel({
 						<span>
 							<LayoutGrid size={18} /> 首页卡片
 						</span>
-						<small>为后续自定义排序和新增 API 卡片预留</small>
 					</div>
 					<div className="home-card-manager">
 						{homeCardColumns.map(([column, label]) => (
@@ -170,7 +169,6 @@ export function SettingsPanel({
 										>
 											<span>
 												<b>{card.label}</b>
-												<small>{card.description}</small>
 											</span>
 											<div className="home-card-actions">
 												<em>{visible ? "显示中" : "已隐藏"}</em>
@@ -224,9 +222,6 @@ export function SettingsPanel({
 							</button>
 						</div>
 					)}
-					<p className="home-card-note">
-						当前仍沿用模块开关控制显示状态；排序和左右栏位置会保存在本地浏览器，后续可以继续接入拖拽和更多接口卡片。
-					</p>
 				</div>
 			)}
 			{!compact && wallpaper && setWallpaper && (
@@ -242,7 +237,6 @@ export function SettingsPanel({
 									)}
 									明暗主题
 								</span>
-								<small>选择更适合当前环境的显示亮度</small>
 							</div>
 							<div className="color-theme-grid">
 								{colorThemes.map((theme) => (
@@ -271,7 +265,6 @@ export function SettingsPanel({
 								<span>
 									<LayoutGrid size={18} /> 外壳主题
 								</span>
-								<small>同步调整顶部导航和底部状态栏的样式</small>
 							</div>
 							<div className="chrome-theme-grid">
 								{chromeThemes.map((theme) => (
@@ -298,7 +291,6 @@ export function SettingsPanel({
 						<span>
 							<ImageIcon size={18} /> 壁纸
 						</span>
-						<small>默认壁纸不加载外部资源，自定义图片只保存在本地浏览器</small>
 					</div>
 					<div className="wallpaper-grid">
 						{wallpaperOptions.map((option) => (

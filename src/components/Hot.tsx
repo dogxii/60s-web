@@ -28,7 +28,6 @@ export function HotPage({
 				<span>
 					<Flame size={24} /> 热榜广场
 				</span>
-				<small>聚合多个榜单源，打开页面即可纵览，不再重复切换。</small>
 			</div>
 			<div className="multi-board-grid">
 				{hotBoards.map((board) => (
