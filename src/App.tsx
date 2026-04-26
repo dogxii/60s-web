@@ -401,6 +401,7 @@ export function App() {
 						apiBase={apiBase}
 						setApiBase={setApiBase}
 						homeCardLayout={homeCardLayout}
+						setHomeCardLayout={setHomeCardLayout}
 						setActivePage={setActivePage}
 						setActiveTool={setActiveTool}
 						setSettings={setSettings}

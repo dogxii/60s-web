@@ -80,8 +80,8 @@ export function isHomeCardVisible(
 	card: HomeCardDefinition,
 	settings: SettingsState,
 ) {
-		if (!card.settingKey) return true;
-		return settings[card.settingKey];
+	if (!card.settingKey) return true;
+	return settings[card.settingKey];
 }
 
 export function getHomeCards(
@@ -120,4 +120,32 @@ export function normalizeHomeCardLayout(
 	}
 
 	return next;
+}
+
+export function moveHomeCard(
+	layout: HomeCardLayout,
+	cardId: HomeCardId,
+	targetColumn: HomeCardColumn,
+	targetIndex: number,
+): HomeCardLayout {
+	const next = normalizeHomeCardLayout(layout);
+	const sourceColumn = homeCardColumns.find((column) =>
+		next[column].includes(cardId),
+	);
+	if (!sourceColumn) return next;
+
+	const sourceIndex = next[sourceColumn].indexOf(cardId);
+	next[sourceColumn].splice(sourceIndex, 1);
+
+	const adjustedIndex =
+		sourceColumn === targetColumn && sourceIndex < targetIndex
+			? targetIndex - 1
+			: targetIndex;
+	const insertIndex = Math.max(
+		0,
+		Math.min(adjustedIndex, next[targetColumn].length),
+	);
+	next[targetColumn].splice(insertIndex, 0, cardId);
+
+	return normalizeHomeCardLayout(next);
 }

@@ -11,6 +11,7 @@ import {
 	defaultHomeCardLayout,
 	getHomeCardDefinition,
 	isHomeCardVisible,
+	moveHomeCard,
 	type HomeCardColumn,
 	type HomeCardId,
 	type HomeCardLayout,
@@ -76,30 +77,23 @@ export function SettingsPanel({
 		action: "up" | "down" | "swap",
 	) => {
 		if (!setHomeCardLayout) return;
-		const next: HomeCardLayout = {
-			left: [...homeCardLayout.left],
-			right: [...homeCardLayout.right],
-		};
-		const currentIndex = next[column].indexOf(cardId);
+		const currentIndex = homeCardLayout[column].indexOf(cardId);
 		if (currentIndex < 0) return;
+		let targetColumn = column;
+		let targetIndex = currentIndex;
 		if (action === "up" && currentIndex > 0) {
-			[next[column][currentIndex - 1], next[column][currentIndex]] = [
-				next[column][currentIndex],
-				next[column][currentIndex - 1],
-			];
+			targetIndex = currentIndex - 1;
 		}
-		if (action === "down" && currentIndex < next[column].length - 1) {
-			[next[column][currentIndex + 1], next[column][currentIndex]] = [
-				next[column][currentIndex],
-				next[column][currentIndex + 1],
-			];
+		if (action === "down" && currentIndex < homeCardLayout[column].length - 1) {
+			targetIndex = currentIndex + 2;
 		}
 		if (action === "swap") {
-			const targetColumn: HomeCardColumn = column === "left" ? "right" : "left";
-			next[column].splice(currentIndex, 1);
-			next[targetColumn].push(cardId);
+			targetColumn = column === "left" ? "right" : "left";
+			targetIndex = homeCardLayout[targetColumn].length;
 		}
-		setHomeCardLayout(next);
+		setHomeCardLayout(
+			moveHomeCard(homeCardLayout, cardId, targetColumn, targetIndex),
+		);
 	};
 	const handleWallpaperFile = (file?: File) => {
 		if (!file || !setWallpaper) return;

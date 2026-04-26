@@ -587,6 +587,20 @@ main {
 	align-items: start;
 }
 
+.home-reorder-hint {
+	grid-column: 1 / -1;
+	justify-self: center;
+	margin-bottom: -4px;
+	padding: 7px 12px;
+	border: 1px solid rgba(15, 155, 142, 0.16);
+	border-radius: 999px;
+	background: rgba(255, 255, 255, 0.66);
+	color: var(--muted);
+	font-size: 12px;
+	font-weight: 800;
+	backdrop-filter: blur(12px);
+}
+
 .home-left,
 .home-right {
 	display: grid;
@@ -596,6 +610,73 @@ main {
 
 .home-card-slot {
 	min-width: 0;
+	position: relative;
+	cursor: grab;
+	touch-action: pan-y;
+	user-select: none;
+	transition:
+		opacity 0.18s ease,
+		transform 0.18s ease;
+}
+
+.home-card-slot:active {
+	cursor: grabbing;
+}
+
+.home-card-slot.is-dragging {
+	opacity: 0.48;
+	pointer-events: none;
+	transform: scale(0.985);
+}
+
+.home-drop-column.is-reordering {
+	user-select: none;
+}
+
+.home-card-slot.is-drop-target::before {
+	content: "";
+	position: absolute;
+	top: -12px;
+	left: 10px;
+	right: 10px;
+	height: 4px;
+	z-index: 3;
+	border-radius: 999px;
+	background: var(--accent);
+	box-shadow: 0 0 0 4px rgba(15, 155, 142, 0.12);
+}
+
+.home-drop-zone {
+	min-height: 0;
+	display: grid;
+	place-items: center;
+	overflow: hidden;
+	border: 1px dashed transparent;
+	border-radius: 10px;
+	color: var(--muted);
+	font-size: 13px;
+	font-weight: 800;
+	opacity: 0;
+	pointer-events: none;
+	transition:
+		min-height 0.18s ease,
+		opacity 0.18s ease,
+		border-color 0.18s ease,
+		background 0.18s ease;
+}
+
+.home-drop-column.is-reordering .home-drop-zone {
+	min-height: 48px;
+	border-color: rgba(15, 155, 142, 0.28);
+	background: rgba(15, 155, 142, 0.06);
+	opacity: 1;
+	pointer-events: auto;
+}
+
+.home-drop-zone.is-drop-target {
+	border-color: var(--accent);
+	background: rgba(15, 155, 142, 0.12);
+	color: var(--accent-dark);
 }
 
 .home-right-split {
@@ -2550,6 +2631,21 @@ footer strong {
 .theme-dark .home-card-item em {
 	background: rgba(89, 209, 194, 0.15);
 	color: #8ff2e6;
+}
+
+.theme-dark .home-drop-column.is-reordering .home-drop-zone {
+	background: rgba(55, 216, 197, 0.08);
+	border-color: rgba(55, 216, 197, 0.28);
+}
+
+.theme-dark .home-drop-zone.is-drop-target {
+	background: rgba(55, 216, 197, 0.16);
+	color: var(--accent-dark);
+}
+
+.theme-dark .home-reorder-hint {
+	background: rgba(14, 29, 27, 0.66);
+	border-color: rgba(55, 216, 197, 0.18);
 }
 
 .theme-dark .home-card-actions button,
