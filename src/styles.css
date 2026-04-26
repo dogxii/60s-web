@@ -2720,8 +2720,8 @@ footer strong {
 
 	.topbar {
 		grid-template-columns: minmax(0, 1fr) auto;
-		gap: 6px 10px;
-		padding: 8px 10px 6px;
+		gap: 4px 8px;
+		padding: 6px 10px 5px;
 	}
 
 	.brand {
@@ -2729,10 +2729,10 @@ footer strong {
 	}
 
 	.brand span {
-		width: 34px;
-		height: 34px;
+		width: 30px;
+		height: 30px;
 		border-width: 2px;
-		font-size: 12px;
+		font-size: 11px;
 	}
 
 	main {
@@ -2741,7 +2741,7 @@ footer strong {
 
 	.brand strong {
 		overflow: hidden;
-		font-size: 16px;
+		font-size: 15px;
 		text-overflow: ellipsis;
 	}
 
@@ -2750,13 +2750,14 @@ footer strong {
 		grid-column: 2;
 		grid-row: 1;
 		justify-self: end;
-		gap: 8px;
+		gap: 6px;
 	}
 
 	.city-select {
 		min-width: 84px;
-		height: 34px;
-		padding: 0 9px;
+		height: 30px;
+		padding: 0 8px;
+		font-size: 12px;
 	}
 
 	.city-select input {
@@ -2764,8 +2765,8 @@ footer strong {
 	}
 
 	.theme-toggle {
-		width: 34px;
-		height: 34px;
+		width: 30px;
+		height: 30px;
 	}
 
 	.topbar nav {
@@ -2776,8 +2777,8 @@ footer strong {
 		height: auto;
 		display: flex;
 		justify-content: flex-start;
-		gap: 5px;
-		padding: 2px 0 0;
+		gap: 4px;
+		padding: 0;
 		overflow-x: auto;
 		scrollbar-width: none;
 	}
@@ -2788,9 +2789,9 @@ footer strong {
 
 	.topbar nav button {
 		flex: 0 0 auto;
-		height: 34px;
-		min-width: 62px;
-		padding: 0 9px;
+		height: 30px;
+		min-width: 56px;
+		padding: 0 8px;
 		flex-direction: row;
 		justify-content: center;
 		gap: 5px;
@@ -2810,8 +2811,8 @@ footer strong {
 	}
 
 	.avatar {
-		width: 34px;
-		height: 34px;
+		width: 30px;
+		height: 30px;
 	}
 
 	.avatar-popover {
@@ -2827,20 +2828,29 @@ footer strong {
 	}
 
 	.search-box {
-		grid-template-columns: 24px minmax(0, 1fr);
-		height: auto;
-		min-height: 58px;
-		padding: 10px 12px;
-		border-radius: 14px;
+		grid-template-columns: 20px minmax(0, 1fr) 58px;
+		height: 46px;
+		min-height: 46px;
+		gap: 8px;
+		padding: 6px 8px 6px 12px;
+		border-radius: 12px;
+	}
+
+	.search-box input {
+		font-size: 14px;
 	}
 
 	.search-box button {
-		grid-column: 1 / -1;
-		width: 100%;
+		grid-column: auto;
+		width: auto;
+		height: 32px;
+		padding: 0 10px;
+		font-size: 12px;
 	}
 
 	.search-providers {
 		justify-content: flex-start;
+		margin-top: 8px;
 		overflow-x: auto;
 		scrollbar-width: none;
 	}
@@ -2851,12 +2861,19 @@ footer strong {
 
 	.search-providers button {
 		flex: 0 0 auto;
+		min-width: 68px;
+		height: 30px;
+	}
+
+	.search-providers small {
+		display: none;
 	}
 
 	.quick-chips {
 		flex-wrap: nowrap;
 		justify-content: flex-start;
-		margin-inline: -12px;
+		gap: 8px;
+		margin: 10px -12px 0;
 		padding: 0 12px 4px;
 		overflow-x: auto;
 		scrollbar-width: none;
@@ -2868,6 +2885,9 @@ footer strong {
 
 	.quick-chips button {
 		flex: 0 0 auto;
+		height: 32px;
+		padding: 0 12px;
+		font-size: 12px;
 	}
 
 	.weather-main {
@@ -3088,7 +3108,7 @@ footer strong {
 
 @media (max-width: 520px) {
 	.search-band {
-		padding: 14px 0 16px;
+		padding: 10px 0 12px;
 	}
 
 	.page-title {
