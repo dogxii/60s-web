@@ -14,55 +14,76 @@ export type HomeCardColumn = "left" | "right";
 export type HomeCardDefinition = {
 	id: HomeCardId;
 	label: string;
-	column: HomeCardColumn;
+	description: string;
 	settingKey?: keyof Pick<SettingsState, "showNews" | "showHot" | "showWeather">;
 };
 
-export const homeCardRegistry: HomeCardDefinition[] = [
-	{
+export type HomeCardLayout = Record<HomeCardColumn, HomeCardId[]>;
+
+export const homeCardRegistry: Record<HomeCardId, HomeCardDefinition> = {
+	daily: {
 		id: "daily",
 		label: "今日 60 秒",
-		column: "left",
+		description: "每日新闻摘要与快捷阅读入口",
 		settingKey: "showNews",
 	},
-	{
+	hot: {
 		id: "hot",
 		label: "全网热榜",
-		column: "left",
+		description: "微博、知乎、B 站等平台热榜聚合",
 		settingKey: "showHot",
 	},
-	{
+	settings: {
 		id: "settings",
 		label: "模块设置",
-		column: "left",
+		description: "首页模块、缓存刷新与基础配置",
 	},
-	{
+	weather: {
 		id: "weather",
 		label: "城市天气",
-		column: "right",
+		description: "实时天气与未来预报",
 		settingKey: "showWeather",
 	},
-	{
+	market: {
 		id: "market",
 		label: "实用数据",
-		column: "right",
+		description: "金价、油价、汇率等生活数据",
 	},
-	{
+	entertainmentTools: {
 		id: "entertainmentTools",
 		label: "娱乐与工具",
-		column: "right",
+		description: "影视娱乐信息与常用工具快捷入口",
 	},
-	{
+	quote: {
 		id: "quote",
 		label: "每日一句",
-		column: "right",
+		description: "随机一言与轻量阅读收尾",
 	},
-];
+};
 
-export function getHomeCards(column: HomeCardColumn, settings: SettingsState) {
-	return homeCardRegistry.filter((card) => {
-		if (card.column !== column) return false;
+export const defaultHomeCardLayout: HomeCardLayout = {
+	left: ["daily", "hot", "settings"],
+	right: ["weather", "market", "entertainmentTools", "quote"],
+};
+
+export function getHomeCardDefinition(cardId: HomeCardId) {
+	return homeCardRegistry[cardId];
+}
+
+export function isHomeCardVisible(
+	card: HomeCardDefinition,
+	settings: SettingsState,
+) {
 		if (!card.settingKey) return true;
 		return settings[card.settingKey];
-	});
+}
+
+export function getHomeCards(
+	column: HomeCardColumn,
+	settings: SettingsState,
+	layout: HomeCardLayout = defaultHomeCardLayout,
+) {
+	return layout[column]
+		.map(getHomeCardDefinition)
+		.filter((card) => isHomeCardVisible(card, settings));
 }
