@@ -121,7 +121,7 @@ export function Header({
 							onClick={() => setActivePage(item.id)}
 						>
 							<Icon size={19} />
-							{item.label}
+							<span className="nav-label">{item.label}</span>
 						</button>
 					);
 				})}

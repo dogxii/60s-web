@@ -3,7 +3,6 @@ import type { SettingsState } from "./types";
 export type HomeCardId =
 	| "daily"
 	| "hot"
-	| "settings"
 	| "weather"
 	| "market"
 	| "entertainmentTools"
@@ -33,11 +32,6 @@ export const homeCardRegistry: Record<HomeCardId, HomeCardDefinition> = {
 		description: "微博、知乎、B 站等平台热榜聚合",
 		settingKey: "showHot",
 	},
-	settings: {
-		id: "settings",
-		label: "模块设置",
-		description: "首页模块、缓存刷新与基础配置",
-	},
 	weather: {
 		id: "weather",
 		label: "城市天气",
@@ -62,7 +56,7 @@ export const homeCardRegistry: Record<HomeCardId, HomeCardDefinition> = {
 };
 
 export const defaultHomeCardLayout: HomeCardLayout = {
-	left: ["daily", "hot", "settings"],
+	left: ["daily", "hot"],
 	right: ["weather", "market", "entertainmentTools", "quote"],
 };
 

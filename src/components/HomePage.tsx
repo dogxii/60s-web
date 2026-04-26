@@ -31,7 +31,6 @@ import {
 } from "./HomeCards";
 import { HotBoard } from "./Hot";
 import { DailyCard } from "./News";
-import { SettingsPanel } from "./SettingsPanel";
 import { WeatherCard } from "./Weather";
 
 type HomePageProps = {
@@ -52,13 +51,10 @@ type HomePageProps = {
 	movieItems: HotItem[];
 	hitokoto?: unknown;
 	apiBase: string;
-	setApiBase: (value: string) => void;
 	homeCardLayout: HomeCardLayout;
 	setHomeCardLayout: (layout: HomeCardLayout) => void;
 	setActivePage: (page: PageId) => void;
 	setActiveTool: (tool: ToolId) => void;
-	setSettings: (value: SettingsState) => void;
-	reloadAll: () => void;
 };
 
 export function HomePage({
@@ -79,13 +75,10 @@ export function HomePage({
 	movieItems,
 	hitokoto,
 	apiBase,
-	setApiBase,
 	homeCardLayout,
 	setHomeCardLayout,
 	setActivePage,
 	setActiveTool,
-	setSettings,
-	reloadAll,
 }: HomePageProps) {
 	const [isEditing, setIsEditing] = useState(false);
 	const [draggedCard, setDraggedCard] = useState<{
@@ -269,18 +262,6 @@ export function HomePage({
 				/>
 			);
 		}
-		if (cardId === "settings") {
-			return (
-				<SettingsPanel
-					apiBase={apiBase}
-					setApiBase={setApiBase}
-					settings={settings}
-					setSettings={setSettings}
-					reloadAll={reloadAll}
-					compact
-				/>
-			);
-		}
 		if (cardId === "weather") {
 			return (
 				<WeatherCard
@@ -368,6 +349,8 @@ export function HomePage({
 
 	return (
 		<section className={`home-layout ${isEditing ? "is-editing" : ""}`}>
+			{renderColumn("left", "home-left", "主阅读栏")}
+			{renderColumn("right", "home-right", "辅助信息栏")}
 			<div className="home-editbar">
 				<button
 					type="button"
@@ -381,8 +364,6 @@ export function HomePage({
 					{isEditing ? "完成" : "编辑"}
 				</button>
 			</div>
-			{renderColumn("left", "home-left", "主阅读栏")}
-			{renderColumn("right", "home-right", "辅助信息栏")}
 		</section>
 	);
 }

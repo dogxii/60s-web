@@ -590,7 +590,7 @@ main {
 .home-editbar {
 	grid-column: 1 / -1;
 	justify-self: end;
-	margin-bottom: -4px;
+	margin-top: -4px;
 }
 
 .home-editbar button {
@@ -2819,35 +2819,61 @@ footer strong {
 
 @media (max-width: 1180px) {
 	.topbar {
-		grid-template-columns: 1fr;
-		height: auto;
-		padding: 10px 18px 0;
+		grid-template-columns: minmax(190px, 1fr) auto auto;
+		height: 58px;
+		gap: 14px;
+		padding: 0 18px;
 	}
 
 	.chrome-floating .topbar {
 		width: min(100% - 56px, var(--shell-width));
-		grid-template-columns: 1fr;
-		height: auto;
-		padding: 10px 18px 0;
+		grid-template-columns: minmax(190px, 1fr) auto auto;
+		height: 58px;
+		padding: 0 18px;
 	}
 
 	.topbar nav {
-		order: 3;
-		width: 100%;
-		padding-top: 6px;
-		justify-content: flex-start;
-		overflow-x: auto;
-		scrollbar-width: none;
+		width: auto;
+		height: 38px;
+		justify-self: center;
+		justify-content: center;
+		gap: 3px;
+		padding: 3px;
+		border: 1px solid var(--line);
+		border-radius: 999px;
+		background: rgba(255, 255, 255, 0.64);
+		overflow: visible;
 	}
 
-	.topbar nav::-webkit-scrollbar {
+	.theme-dark .topbar nav {
+		background: rgba(14, 29, 27, 0.66);
+	}
+
+	.topbar nav button {
+		width: 32px;
+		height: 30px;
+		justify-content: center;
+		padding: 0;
+		border: 0;
+		border-radius: 999px;
+	}
+
+	.topbar nav button.active {
+		background: rgba(15, 155, 142, 0.12);
+		border: 0;
+	}
+
+	.topbar nav button.active::after {
+		display: none;
+	}
+
+	.topbar nav .nav-label {
 		display: none;
 	}
 
 	.header-actions {
-		position: absolute;
-		right: 20px;
-		top: 14px;
+		position: static;
+		justify-self: end;
 	}
 
 	.home-layout,
@@ -2942,8 +2968,19 @@ footer strong {
 		justify-content: flex-start;
 		gap: 4px;
 		padding: 0;
+		border: 0;
+		border-radius: 0;
+		background: transparent;
 		overflow-x: auto;
 		scrollbar-width: none;
+	}
+
+	.topbar nav .nav-label {
+		display: inline;
+	}
+
+	.theme-dark .topbar nav {
+		background: transparent;
 	}
 
 	.topbar nav::-webkit-scrollbar {

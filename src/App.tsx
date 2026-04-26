@@ -399,13 +399,10 @@ export function App() {
 						movieItems={movieItems}
 						hitokoto={hitokoto.data}
 						apiBase={apiBase}
-						setApiBase={setApiBase}
 						homeCardLayout={homeCardLayout}
 						setHomeCardLayout={setHomeCardLayout}
 						setActivePage={setActivePage}
 						setActiveTool={setActiveTool}
-						setSettings={setSettings}
-						reloadAll={reloadAll}
 					/>
 				)}
 				{activePage === "hot" && (
