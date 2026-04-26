@@ -1,12 +1,10 @@
 import {
 	CalendarClock,
 	CircleDollarSign,
-	Code2,
 	Coins,
 	Film,
 	Fuel,
 	Gauge,
-	Github,
 	ShieldCheck,
 } from "lucide-react";
 import {
@@ -22,7 +20,6 @@ import {
 	API_REPO_URL,
 	EPIC_COVER_PLACEHOLDER,
 	toolDefinitions,
-	WEB_REPO_URL,
 } from "../config";
 import type { ApiState, PageId, ToolId } from "../types";
 import { readCurrencyRate } from "../utils";
@@ -95,56 +92,58 @@ export function EntertainmentCard({
 	return (
 		<article className="card entertainment">
 			<CardTitle icon={<Film size={21} />} title="影视与娱乐" />
-			<div className="mini-section">
-				<div className="mini-heading">
-					<b>电影票房</b>
-					<small>实时</small>
-				</div>
-				{movies.length === 0 && <p className="muted">正在读取票房...</p>}
-				{movies.map((movie, index) => (
-					<div
-						className="compact-row"
-						key={`${movie.title || movie.name || movie.movie_name}-${index}`}
-					>
-						<span>{index + 1}</span>
-						<b>{movie.title || movie.name || movie.movie_name}</b>
-						<small>
-							{movie.box_office_desc ||
-								formatHotValue(movie.hot_value ?? movie.score ?? movie.heat)}
-						</small>
+			<div className="entertainment-sections">
+				<div className="mini-section">
+					<div className="mini-heading">
+						<b>电影票房</b>
+						<small>实时</small>
 					</div>
-				))}
-			</div>
-			<div className="mini-section game-list">
-				<div className="mini-heading">
-					<b>Epic 本周免费游戏</b>
-					<small>每周</small>
-				</div>
-				{games.map((game) => (
-					<a
-						className="game-row"
-						key={game.id}
-						href={game.link}
-						target="_blank"
-						rel="noreferrer"
-					>
-						<img
-							src={game.cover || EPIC_COVER_PLACEHOLDER}
-							alt=""
-							onError={(event) => {
-								event.currentTarget.src = EPIC_COVER_PLACEHOLDER;
-							}}
-						/>
-						<span>
-							<b>{game.title}</b>
+					{movies.length === 0 && <p className="muted">正在读取票房...</p>}
+					{movies.map((movie, index) => (
+						<div
+							className="compact-row"
+							key={`${movie.title || movie.name || movie.movie_name}-${index}`}
+						>
+							<span>{index + 1}</span>
+							<b>{movie.title || movie.name || movie.movie_name}</b>
 							<small>
-								{game.is_free_now
-									? "限时免费领取"
-									: game.original_price_desc || "即将免费"}
+								{movie.box_office_desc ||
+									formatHotValue(movie.hot_value ?? movie.score ?? movie.heat)}
 							</small>
-						</span>
-					</a>
-				))}
+						</div>
+					))}
+				</div>
+				<div className="mini-section game-list">
+					<div className="mini-heading">
+						<b>Epic 本周免费游戏</b>
+						<small>每周</small>
+					</div>
+					{games.map((game) => (
+						<a
+							className="game-row"
+							key={game.id}
+							href={game.link}
+							target="_blank"
+							rel="noreferrer"
+						>
+							<img
+								src={game.cover || EPIC_COVER_PLACEHOLDER}
+								alt=""
+								onError={(event) => {
+									event.currentTarget.src = EPIC_COVER_PLACEHOLDER;
+								}}
+							/>
+							<span>
+								<b>{game.title}</b>
+								<small>
+									{game.is_free_now
+										? "限时免费领取"
+										: game.original_price_desc || "即将免费"}
+								</small>
+							</span>
+						</a>
+					))}
+				</div>
 			</div>
 		</article>
 	);
@@ -213,21 +212,6 @@ export function ToolShortcuts({
 						</a>
 					);
 				})}
-			</div>
-			<div className="tool-card-extra">
-				<div>
-					<b>接口实验室</b>
-					<small>按关键词筛选并直接运行 60s API</small>
-				</div>
-				{setActivePage ? (
-					<button type="button" onClick={() => setActivePage("tools")}>
-						<Code2 size={16} /> 打开
-					</button>
-				) : (
-					<a href={WEB_REPO_URL} target="_blank" rel="noreferrer">
-						<Github size={16} /> GitHub
-					</a>
-				)}
 			</div>
 		</article>
 	);

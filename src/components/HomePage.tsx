@@ -31,15 +31,19 @@ import {
 } from "./HomeCards";
 import { HotBoard } from "./Hot";
 import { DailyCard } from "./News";
+import { HomeModuleSettings } from "./SettingsPanel";
 import { WeatherCard } from "./Weather";
 
 type HomePageProps = {
+	apiBase: string;
+	setApiBase: (value: string) => void;
+	city: string;
+	setCity: (city: string) => void;
 	settings: SettingsState;
+	setSettings: (value: SettingsState) => void;
 	daily: ApiState<DailyNews> & { reload: () => void };
 	weather: ApiState<WeatherRealtime> & { reload: () => void };
 	forecast: ApiState<WeatherForecast> & { reload: () => void };
-	city: string;
-	setCity: (city: string) => void;
 	gold: ApiState<GoldPrice> & { reload: () => void };
 	fuel: ApiState<FuelPrice> & { reload: () => void };
 	exchange: ApiState<ExchangeRate> & { reload: () => void };
@@ -50,7 +54,6 @@ type HomePageProps = {
 	epic: ApiState<EpicGame[]>;
 	movieItems: HotItem[];
 	hitokoto?: unknown;
-	apiBase: string;
 	homeCardLayout: HomeCardLayout;
 	setHomeCardLayout: (layout: HomeCardLayout) => void;
 	setActivePage: (page: PageId) => void;
@@ -58,12 +61,15 @@ type HomePageProps = {
 };
 
 export function HomePage({
+	apiBase,
+	setApiBase,
+	city,
+	setCity,
 	settings,
+	setSettings,
 	daily,
 	weather,
 	forecast,
-	city,
-	setCity,
 	gold,
 	fuel,
 	exchange,
@@ -74,7 +80,6 @@ export function HomePage({
 	epic,
 	movieItems,
 	hitokoto,
-	apiBase,
 	homeCardLayout,
 	setHomeCardLayout,
 	setActivePage,
@@ -334,6 +339,16 @@ export function HomePage({
 						</div>
 					);
 				})}
+				{column === "left" && (
+					<HomeModuleSettings
+						apiBase={apiBase}
+						setApiBase={setApiBase}
+						city={city}
+						setCity={setCity}
+						settings={settings}
+						setSettings={setSettings}
+					/>
+				)}
 				<div
 					className={`home-drop-zone ${
 						dropTarget?.column === column && dropTarget.index === endIndex

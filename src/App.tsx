@@ -382,12 +382,15 @@ export function App() {
 
 				{activePage === "home" && (
 					<HomePage
+						apiBase={apiBase}
+						setApiBase={setApiBase}
+						city={city}
+						setCity={setCity}
 						settings={settings}
+						setSettings={setSettings}
 						daily={daily}
 						weather={weather}
 						forecast={forecast}
-						city={city}
-						setCity={setCity}
 						gold={gold}
 						fuel={fuel}
 						exchange={exchange}
@@ -398,7 +401,6 @@ export function App() {
 						epic={epic}
 						movieItems={movieItems}
 						hitokoto={hitokoto.data}
-						apiBase={apiBase}
 						homeCardLayout={homeCardLayout}
 						setHomeCardLayout={setHomeCardLayout}
 						setActivePage={setActivePage}
@@ -436,17 +438,12 @@ export function App() {
 							setApiBase={setApiBase}
 							city={city}
 							setCity={setCity}
-							settings={settings}
-							setSettings={setSettings}
-							reloadAll={reloadAll}
 							wallpaper={wallpaper}
 							setWallpaper={setWallpaper}
 							chromeTheme={chromeTheme}
 							setChromeTheme={setChromeTheme}
 							colorTheme={colorTheme}
 							setColorTheme={setColorTheme}
-							homeCardLayout={homeCardLayout}
-							setHomeCardLayout={setHomeCardLayout}
 						/>
 					</section>
 				)}
