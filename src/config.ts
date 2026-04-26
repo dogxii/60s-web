@@ -36,6 +36,7 @@ export const STORAGE_KEYS = {
 	wallpaper: "60s-web:wallpaper",
 	chromeTheme: "60s-web:chrome-theme",
 	colorTheme: "60s-web:color-theme",
+	homeCardLayout: "60s-web:home-card-layout",
 } as const;
 
 export const nav = [

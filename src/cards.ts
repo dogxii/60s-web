@@ -66,6 +66,12 @@ export const defaultHomeCardLayout: HomeCardLayout = {
 	right: ["weather", "market", "entertainmentTools", "quote"],
 };
 
+const homeCardColumns: HomeCardColumn[] = ["left", "right"];
+
+function isHomeCardId(value: unknown): value is HomeCardId {
+	return typeof value === "string" && value in homeCardRegistry;
+}
+
 export function getHomeCardDefinition(cardId: HomeCardId) {
 	return homeCardRegistry[cardId];
 }
@@ -86,4 +92,32 @@ export function getHomeCards(
 	return layout[column]
 		.map(getHomeCardDefinition)
 		.filter((card) => isHomeCardVisible(card, settings));
+}
+
+export function normalizeHomeCardLayout(
+	layout?: Partial<Record<HomeCardColumn, unknown>>,
+): HomeCardLayout {
+	const assigned = new Set<HomeCardId>();
+	const next: HomeCardLayout = { left: [], right: [] };
+
+	for (const column of homeCardColumns) {
+		const rawCards = Array.isArray(layout?.[column])
+			? layout[column]
+			: defaultHomeCardLayout[column];
+		for (const cardId of rawCards) {
+			if (!isHomeCardId(cardId) || assigned.has(cardId)) continue;
+			next[column].push(cardId);
+			assigned.add(cardId);
+		}
+	}
+
+	for (const column of homeCardColumns) {
+		for (const cardId of defaultHomeCardLayout[column]) {
+			if (assigned.has(cardId)) continue;
+			next[column].push(cardId);
+			assigned.add(cardId);
+		}
+	}
+
+	return next;
 }

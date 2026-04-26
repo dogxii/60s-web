@@ -8,7 +8,7 @@ import {
 	type WeatherForecast,
 	type WeatherRealtime,
 } from "../api";
-import { getHomeCards, type HomeCardId } from "../cards";
+import { getHomeCards, type HomeCardId, type HomeCardLayout } from "../cards";
 import { hotTabs } from "../config";
 import type { ApiState, PageId, SettingsState, ToolId } from "../types";
 import {
@@ -41,6 +41,7 @@ type HomePageProps = {
 	hitokoto?: unknown;
 	apiBase: string;
 	setApiBase: (value: string) => void;
+	homeCardLayout: HomeCardLayout;
 	setActivePage: (page: PageId) => void;
 	setActiveTool: (tool: ToolId) => void;
 	setSettings: (value: SettingsState) => void;
@@ -66,6 +67,7 @@ export function HomePage({
 	hitokoto,
 	apiBase,
 	setApiBase,
+	homeCardLayout,
 	setActivePage,
 	setActiveTool,
 	setSettings,
@@ -128,14 +130,14 @@ export function HomePage({
 	return (
 		<section className="home-layout">
 			<div className="home-left">
-				{getHomeCards("left", settings).map((card) => (
+				{getHomeCards("left", settings, homeCardLayout).map((card) => (
 					<div className="home-card-slot" key={card.id}>
 						{renderHomeCard(card.id)}
 					</div>
 				))}
 			</div>
 			<div className="home-right">
-				{getHomeCards("right", settings).map((card) => (
+				{getHomeCards("right", settings, homeCardLayout).map((card) => (
 					<div className="home-card-slot" key={card.id}>
 						{renderHomeCard(card.id)}
 					</div>

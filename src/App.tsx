@@ -26,6 +26,11 @@ import {
 	type WeatherForecast,
 	type WeatherRealtime,
 } from "./api";
+import {
+	defaultHomeCardLayout,
+	normalizeHomeCardLayout,
+	type HomeCardLayout,
+} from "./cards";
 import { EndpointLab } from "./components/EndpointLab";
 import { Header } from "./components/Header";
 import { HotPage } from "./components/Hot";
@@ -103,6 +108,11 @@ export function App() {
 			showNews: true,
 			autoRefresh: true,
 		}),
+	);
+	const [homeCardLayout, setHomeCardLayout] = useState<HomeCardLayout>(() =>
+		normalizeHomeCardLayout(
+			readStoredJson(STORAGE_KEYS.homeCardLayout, defaultHomeCardLayout),
+		),
 	);
 
 	const daily = useApi<DailyNews>(
@@ -211,6 +221,10 @@ export function App() {
 	useEffect(() => {
 		writeStoredJson(STORAGE_KEYS.settings, settings);
 	}, [settings]);
+
+	useEffect(() => {
+		writeStoredJson(STORAGE_KEYS.homeCardLayout, homeCardLayout);
+	}, [homeCardLayout]);
 
 	useEffect(() => {
 		writeStoredJson(STORAGE_KEYS.avatar, avatar);
@@ -386,6 +400,7 @@ export function App() {
 						hitokoto={hitokoto.data}
 						apiBase={apiBase}
 						setApiBase={setApiBase}
+						homeCardLayout={homeCardLayout}
 						setActivePage={setActivePage}
 						setActiveTool={setActiveTool}
 						setSettings={setSettings}
@@ -432,6 +447,8 @@ export function App() {
 							setChromeTheme={setChromeTheme}
 							colorTheme={colorTheme}
 							setColorTheme={setColorTheme}
+							homeCardLayout={homeCardLayout}
+							setHomeCardLayout={setHomeCardLayout}
 						/>
 					</section>
 				)}

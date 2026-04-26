@@ -12,6 +12,8 @@ import {
 	getHomeCardDefinition,
 	isHomeCardVisible,
 	type HomeCardColumn,
+	type HomeCardId,
+	type HomeCardLayout,
 } from "../cards";
 import { chromeThemes, colorThemes, wallpaperOptions } from "../config";
 import type {
@@ -36,6 +38,8 @@ export function SettingsPanel({
 	setChromeTheme,
 	colorTheme,
 	setColorTheme,
+	homeCardLayout = defaultHomeCardLayout,
+	setHomeCardLayout,
 	compact = false,
 }: {
 	apiBase: string;
@@ -51,6 +55,8 @@ export function SettingsPanel({
 	setChromeTheme?: (value: ChromeTheme) => void;
 	colorTheme?: ColorTheme;
 	setColorTheme?: (value: ColorTheme) => void;
+	homeCardLayout?: HomeCardLayout;
+	setHomeCardLayout?: (value: HomeCardLayout) => void;
 	compact?: boolean;
 }) {
 	const wallpaperInputRef = useRef<HTMLInputElement | null>(null);
@@ -64,6 +70,37 @@ export function SettingsPanel({
 		["left", "主阅读栏"],
 		["right", "辅助信息栏"],
 	];
+	const updateHomeCardLayout = (
+		cardId: HomeCardId,
+		column: HomeCardColumn,
+		action: "up" | "down" | "swap",
+	) => {
+		if (!setHomeCardLayout) return;
+		const next: HomeCardLayout = {
+			left: [...homeCardLayout.left],
+			right: [...homeCardLayout.right],
+		};
+		const currentIndex = next[column].indexOf(cardId);
+		if (currentIndex < 0) return;
+		if (action === "up" && currentIndex > 0) {
+			[next[column][currentIndex - 1], next[column][currentIndex]] = [
+				next[column][currentIndex],
+				next[column][currentIndex - 1],
+			];
+		}
+		if (action === "down" && currentIndex < next[column].length - 1) {
+			[next[column][currentIndex + 1], next[column][currentIndex]] = [
+				next[column][currentIndex],
+				next[column][currentIndex + 1],
+			];
+		}
+		if (action === "swap") {
+			const targetColumn: HomeCardColumn = column === "left" ? "right" : "left";
+			next[column].splice(currentIndex, 1);
+			next[targetColumn].push(cardId);
+		}
+		setHomeCardLayout(next);
+	};
 	const handleWallpaperFile = (file?: File) => {
 		if (!file || !setWallpaper) return;
 		if (!file.type.startsWith("image/")) return;
@@ -129,7 +166,7 @@ export function SettingsPanel({
 						{homeCardColumns.map(([column, label]) => (
 							<div className="home-card-column" key={column}>
 								<b>{label}</b>
-								{defaultHomeCardLayout[column].map((cardId) => {
+								{homeCardLayout[column].map((cardId, index) => {
 									const card = getHomeCardDefinition(cardId);
 									const visible = isHomeCardVisible(card, settings);
 									return (
@@ -141,15 +178,60 @@ export function SettingsPanel({
 												<b>{card.label}</b>
 												<small>{card.description}</small>
 											</span>
-											<em>{visible ? "显示中" : "已隐藏"}</em>
+											<div className="home-card-actions">
+												<em>{visible ? "显示中" : "已隐藏"}</em>
+												<button
+													type="button"
+													disabled={!setHomeCardLayout || index === 0}
+													onClick={() => updateHomeCardLayout(card.id, column, "up")}
+												>
+													上移
+												</button>
+												<button
+													type="button"
+													disabled={
+														!setHomeCardLayout ||
+														index === homeCardLayout[column].length - 1
+													}
+													onClick={() =>
+														updateHomeCardLayout(card.id, column, "down")
+													}
+												>
+													下移
+												</button>
+												<button
+													type="button"
+													disabled={!setHomeCardLayout}
+													onClick={() =>
+														updateHomeCardLayout(card.id, column, "swap")
+													}
+												>
+													{column === "left" ? "到右栏" : "到左栏"}
+												</button>
+											</div>
 										</div>
 									);
 								})}
 							</div>
 						))}
 					</div>
+					{setHomeCardLayout && (
+						<div className="home-card-toolbar">
+							<button
+								type="button"
+								onClick={() =>
+									setHomeCardLayout({
+										left: [...defaultHomeCardLayout.left],
+										right: [...defaultHomeCardLayout.right],
+									})
+								}
+							>
+								恢复默认布局
+							</button>
+						</div>
+					)}
 					<p className="home-card-note">
-						当前仍沿用模块开关控制显示状态；下一阶段可以在这里接入排序、固定、隐藏和更多接口卡片。
+						当前仍沿用模块开关控制显示状态；排序和左右栏位置会保存在本地浏览器，后续可以继续接入拖拽和更多接口卡片。
 					</p>
 				</div>
 			)}
