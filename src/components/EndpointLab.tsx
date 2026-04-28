@@ -7,10 +7,10 @@ import {
 } from "lucide-react";
 import { type FormEvent, useMemo, useState } from "react";
 import {
-	buildUrl,
 	type EndpointDefinition,
 	endpoints,
 	fetchApi,
+	tryBuildUrl,
 } from "../api";
 import { categoryIcons, categoryLabels } from "../config";
 import type { ApiState } from "../types";
@@ -31,6 +31,10 @@ export function EndpointLab({
 		defaults(endpoints[0]),
 	);
 	const [result, setResult] = useState<ApiState<unknown>>({ loading: false });
+	const activeUrl = useMemo(
+		() => tryBuildUrl(apiBase, active.path, params),
+		[active.path, apiBase, params],
+	);
 
 	const visible = useMemo(() => {
 		const keyword = query.trim().toLowerCase();
@@ -125,13 +129,13 @@ export function EndpointLab({
 							<b>{active.name}</b>
 							<small>{active.description}</small>
 						</div>
-						<a
-							href={buildUrl(apiBase, active.path, params)}
-							target="_blank"
-							rel="noreferrer"
-						>
-							打开 <ExternalLink size={15} />
-						</a>
+						{activeUrl ? (
+							<a href={activeUrl} target="_blank" rel="noreferrer">
+								打开 <ExternalLink size={15} />
+							</a>
+						) : (
+							<span className="disabled-link">地址无效</span>
+						)}
 					</div>
 					<form onSubmit={run} className="param-form">
 						{(active.params?.length
@@ -170,11 +174,10 @@ export function EndpointLab({
 							<button
 								type="button"
 								className="outline-button"
-								onClick={() =>
-									navigator.clipboard?.writeText(
-										buildUrl(apiBase, active.path, params),
-									)
-								}
+								disabled={!activeUrl}
+								onClick={() => {
+									if (activeUrl) navigator.clipboard?.writeText(activeUrl);
+								}}
 							>
 								<Copy size={16} /> 复制 URL
 							</button>

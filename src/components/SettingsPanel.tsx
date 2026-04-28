@@ -1,11 +1,19 @@
 import {
+	AlertTriangle,
+	CheckCircle2,
+	Download,
+	FileUp,
 	Image as ImageIcon,
 	LayoutGrid,
+	Loader2,
 	Moon,
+	RotateCcw,
 	Settings,
 	Sun,
+	Wifi,
 } from "lucide-react";
-import { useRef } from "react";
+import { useRef, useState } from "react";
+import { fetchApi, getApiBaseError } from "../api";
 import { chromeThemes, colorThemes, wallpaperOptions } from "../config";
 import type {
 	ChromeTheme,
@@ -14,6 +22,11 @@ import type {
 	WallpaperState,
 } from "../types";
 import { CardTitle } from "./ui";
+
+type ConfigActionResult = {
+	ok: boolean;
+	message: string;
+};
 
 export function SettingsPanel({
 	apiBase,
@@ -26,6 +39,9 @@ export function SettingsPanel({
 	setChromeTheme,
 	colorTheme,
 	setColorTheme,
+	onExportConfig,
+	onImportConfig,
+	onResetConfig,
 	compact = false,
 }: {
 	apiBase: string;
@@ -38,9 +54,20 @@ export function SettingsPanel({
 	setChromeTheme?: (value: ChromeTheme) => void;
 	colorTheme?: ColorTheme;
 	setColorTheme?: (value: ColorTheme) => void;
+	onExportConfig?: () => ConfigActionResult;
+	onImportConfig?: (raw: string) => ConfigActionResult;
+	onResetConfig?: () => ConfigActionResult;
 	compact?: boolean;
 }) {
 	const wallpaperInputRef = useRef<HTMLInputElement | null>(null);
+	const configInputRef = useRef<HTMLInputElement | null>(null);
+	const [apiCheck, setApiCheck] = useState<{
+		status: "idle" | "checking" | "success" | "error";
+		message: string;
+	}>({ status: "idle", message: "" });
+	const [configNotice, setConfigNotice] = useState<ConfigActionResult | null>(
+		null,
+	);
 	const handleWallpaperFile = (file?: File) => {
 		if (!file || !setWallpaper) return;
 		if (!file.type.startsWith("image/")) return;
@@ -56,6 +83,66 @@ export function SettingsPanel({
 		reader.readAsDataURL(file);
 	};
 
+	const checkApiConnection = async () => {
+		const baseError = getApiBaseError(apiBase);
+		if (baseError) {
+			setApiCheck({ status: "error", message: baseError });
+			return;
+		}
+
+		const controller = new AbortController();
+		const timer = window.setTimeout(() => controller.abort(), 6000);
+		setApiCheck({ status: "checking", message: "正在检测 API 连接..." });
+		try {
+			await fetchApi(apiBase, "/60s", {}, controller.signal);
+			setApiCheck({
+				status: "success",
+				message: "连接正常，/60s 接口可以访问。",
+			});
+		} catch (error) {
+			const message =
+				error instanceof DOMException && error.name === "AbortError"
+					? "检测超时，请确认 API 服务可访问。"
+					: error instanceof Error
+						? error.message
+						: "检测失败，请稍后重试。";
+			setApiCheck({ status: "error", message });
+		} finally {
+			window.clearTimeout(timer);
+		}
+	};
+
+	const importConfigFile = (file?: File) => {
+		if (!file || !onImportConfig) return;
+		const reader = new FileReader();
+		reader.onload = () => {
+			if (typeof reader.result !== "string") {
+				setConfigNotice({ ok: false, message: "无法读取配置文件。" });
+				return;
+			}
+			setConfigNotice(onImportConfig(reader.result));
+		};
+		reader.onerror = () => {
+			setConfigNotice({ ok: false, message: "配置文件读取失败。" });
+		};
+		reader.readAsText(file);
+	};
+
+	const exportConfig = () => {
+		if (!onExportConfig) return;
+		setConfigNotice(onExportConfig());
+	};
+
+	const resetConfig = () => {
+		if (!onResetConfig) return;
+		const confirmed = window.confirm(
+			"确定恢复默认设置并清理 60s-web 本地缓存吗？",
+		);
+		if (!confirmed) return;
+		setApiCheck({ status: "idle", message: "" });
+		setConfigNotice(onResetConfig());
+	};
+
 	return (
 		<article
 			className={`card settings-panel ${compact ? "compact-settings" : ""}`}
@@ -64,10 +151,40 @@ export function SettingsPanel({
 			<div className="settings-grid">
 				<label className="api-base">
 					默认 API
-					<input
-						value={apiBase}
-						onChange={(event) => setApiBase(event.target.value)}
-					/>
+					<span className="api-control-row">
+						<input
+							value={apiBase}
+							onChange={(event) => {
+								setApiBase(event.target.value);
+								setApiCheck({ status: "idle", message: "" });
+							}}
+						/>
+						<button
+							type="button"
+							className="outline-button"
+							onClick={checkApiConnection}
+							disabled={apiCheck.status === "checking"}
+						>
+							{apiCheck.status === "checking" ? (
+								<Loader2 className="spin" size={16} />
+							) : (
+								<Wifi size={16} />
+							)}
+							检测
+						</button>
+					</span>
+					{apiCheck.message && (
+						<span className={`settings-notice ${apiCheck.status}`}>
+							{apiCheck.status === "success" ? (
+								<CheckCircle2 size={15} />
+							) : apiCheck.status === "checking" ? (
+								<Loader2 className="spin" size={15} />
+							) : (
+								<AlertTriangle size={15} />
+							)}
+							{apiCheck.message}
+						</span>
+					)}
 				</label>
 				{!compact && city !== undefined && setCity && (
 					<label className="api-base city-setting">
@@ -181,6 +298,67 @@ export function SettingsPanel({
 						hidden
 						onChange={(event) => handleWallpaperFile(event.target.files?.[0])}
 					/>
+				</div>
+			)}
+			{!compact && onExportConfig && onImportConfig && onResetConfig && (
+				<div className="config-settings">
+					<div className="settings-subtitle">
+						<span>
+							<FileUp size={18} /> 配置管理
+						</span>
+						<small>导出不包含头像、QQ 号和自定义壁纸图片</small>
+					</div>
+					<div className="config-action-grid">
+						<button type="button" onClick={exportConfig}>
+							<Download size={18} />
+							<span>
+								<b>导出配置</b>
+								<small>保存当前偏好</small>
+							</span>
+						</button>
+						<button
+							type="button"
+							onClick={() => configInputRef.current?.click()}
+						>
+							<FileUp size={18} />
+							<span>
+								<b>导入配置</b>
+								<small>从 JSON 恢复</small>
+							</span>
+						</button>
+						<button type="button" className="danger" onClick={resetConfig}>
+							<RotateCcw size={18} />
+							<span>
+								<b>恢复默认</b>
+								<small>清理本地缓存</small>
+							</span>
+						</button>
+					</div>
+					<input
+						ref={configInputRef}
+						type="file"
+						accept="application/json,.json"
+						hidden
+						onChange={(event) => {
+							importConfigFile(event.target.files?.[0]);
+							event.currentTarget.value = "";
+						}}
+					/>
+					{configNotice && (
+						<p
+							className={`config-notice ${
+								configNotice.ok ? "success" : "error"
+							}`}
+							role="status"
+						>
+							{configNotice.ok ? (
+								<CheckCircle2 size={16} />
+							) : (
+								<AlertTriangle size={16} />
+							)}
+							{configNotice.message}
+						</p>
+					)}
 				</div>
 			)}
 		</article>

@@ -45,3 +45,12 @@ export function writeCache<T>(key: string, data: T | undefined, updatedAt: numbe
 	if (typeof window === "undefined" || data === undefined) return;
 	window.localStorage.setItem(key, JSON.stringify({ data, updatedAt }));
 }
+
+export function clearStoredPrefix(prefix: string) {
+	if (typeof window === "undefined") return;
+	for (const key of Object.keys(window.localStorage)) {
+		if (key.startsWith(prefix)) {
+			window.localStorage.removeItem(key);
+		}
+	}
+}

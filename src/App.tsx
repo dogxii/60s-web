@@ -13,7 +13,6 @@ import {
 	useState,
 } from "react";
 import {
-	buildUrl,
 	type DailyNews,
 	DEFAULT_API_BASE,
 	type EndpointDefinition,
@@ -22,7 +21,9 @@ import {
 	endpoints,
 	type FuelPrice,
 	type GoldPrice,
+	normalizeApiBase,
 	toItems,
+	tryBuildUrl,
 	type WeatherForecast,
 	type WeatherRealtime,
 } from "./api";
@@ -46,12 +47,16 @@ import {
 } from "./components/ui";
 import {
 	categoryLabels,
+	chromeThemes,
+	colorThemes,
 	hotTabs,
 	searchProviders,
 	STORAGE_KEYS,
+	wallpaperOptions,
 } from "./config";
 import { useApi } from "./hooks/useApi";
 import {
+	clearStoredPrefix,
 	readStoredJson,
 	readStoredValue,
 	writeStoredJson,
@@ -74,40 +79,183 @@ import {
 	getWallpaperStyle,
 } from "./utils";
 
+const DEFAULT_CITY = "上海";
+const DEFAULT_SEARCH_PROVIDER: SearchProviderId = "site";
+const DEFAULT_CHROME_THEME: ChromeTheme = "minimal";
+const DEFAULT_COLOR_THEME: ColorTheme = "light";
+const DEFAULT_SETTINGS_STATE: SettingsState = {
+	showWeather: true,
+	showHot: true,
+	showNews: true,
+	autoRefresh: true,
+};
+const DEFAULT_AVATAR_STATE: AvatarState = { mode: "default" };
+const DEFAULT_WALLPAPER_STATE: WallpaperState = { mode: "default" };
+const CONFIG_EXPORT_VERSION = 1;
+
+type ConfigActionResult = {
+	ok: boolean;
+	message: string;
+};
+
+type ExportedSettings = {
+	apiBase: string;
+	city: string;
+	searchProvider: SearchProviderId;
+	chromeTheme: ChromeTheme;
+	colorTheme: ColorTheme;
+	wallpaper: WallpaperState;
+	avatar: AvatarState;
+	modules: SettingsState;
+	homeCardLayout: HomeCardLayout;
+};
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+	return Boolean(value && typeof value === "object" && !Array.isArray(value));
+}
+
+function readString(value: unknown, fallback: string) {
+	return typeof value === "string" ? value : fallback;
+}
+
+function readBoolean(value: unknown, fallback: boolean, label: string) {
+	if (value === undefined) return fallback;
+	if (typeof value !== "boolean") {
+		throw new Error(`${label} 配置格式无效`);
+	}
+	return value;
+}
+
+function readEnum<T extends string>(
+	value: unknown,
+	allowed: readonly T[],
+	fallback: T,
+	label: string,
+) {
+	if (value === undefined) return fallback;
+	if (typeof value === "string" && allowed.includes(value as T)) return value as T;
+	throw new Error(`${label} 配置值无效`);
+}
+
+function parseImportedConfig(raw: string): ExportedSettings {
+	let parsed: unknown;
+	try {
+		parsed = JSON.parse(raw) as unknown;
+	} catch {
+		throw new Error("配置文件不是有效 JSON");
+	}
+	if (!isRecord(parsed) || parsed.app !== "60s-web") {
+		throw new Error("这不是 60s-web 的配置文件");
+	}
+	if (parsed.version !== CONFIG_EXPORT_VERSION) {
+		throw new Error("配置文件版本不兼容");
+	}
+	if (!isRecord(parsed.settings)) {
+		throw new Error("配置文件缺少 settings 字段");
+	}
+
+	const config = parsed.settings;
+	const apiBase = normalizeApiBase(
+		readString(config.apiBase, DEFAULT_API_BASE),
+	);
+	const wallpaperConfig = isRecord(config.wallpaper) ? config.wallpaper : {};
+	const wallpaperMode = readEnum(
+		wallpaperConfig.mode,
+		wallpaperOptions.map((item) => item.id),
+		DEFAULT_WALLPAPER_STATE.mode,
+		"壁纸",
+	);
+	const modules = isRecord(config.modules) ? config.modules : {};
+
+	return {
+		apiBase,
+		city: readString(config.city, DEFAULT_CITY).trim() || DEFAULT_CITY,
+		searchProvider: readEnum(
+			config.searchProvider,
+			searchProviders.map((item) => item.id),
+			DEFAULT_SEARCH_PROVIDER,
+			"搜索引擎",
+		),
+		chromeTheme: readEnum(
+			config.chromeTheme,
+			chromeThemes.map((item) => item.id),
+			DEFAULT_CHROME_THEME,
+			"外壳主题",
+		),
+		colorTheme: readEnum(
+			config.colorTheme,
+			colorThemes.map((item) => item.id),
+			DEFAULT_COLOR_THEME,
+			"明暗主题",
+		),
+		wallpaper:
+			wallpaperMode === "custom" ? DEFAULT_WALLPAPER_STATE : { mode: wallpaperMode },
+		avatar: DEFAULT_AVATAR_STATE,
+		modules: {
+			showWeather: readBoolean(
+				modules.showWeather,
+				DEFAULT_SETTINGS_STATE.showWeather,
+				"天气模块",
+			),
+			showHot: readBoolean(
+				modules.showHot,
+				DEFAULT_SETTINGS_STATE.showHot,
+				"热榜模块",
+			),
+			showNews: readBoolean(
+				modules.showNews,
+				DEFAULT_SETTINGS_STATE.showNews,
+				"新闻模块",
+			),
+			autoRefresh: readBoolean(
+				modules.autoRefresh,
+				DEFAULT_SETTINGS_STATE.autoRefresh,
+				"自动刷新",
+			),
+		},
+		homeCardLayout: normalizeHomeCardLayout(
+			isRecord(config.homeCardLayout) ? config.homeCardLayout : undefined,
+		),
+	};
+}
+
 export function App() {
 	const [apiBase, setApiBase] = useState(() =>
 		readStoredValue(STORAGE_KEYS.apiBase, DEFAULT_API_BASE),
 	);
 	const [city, setCity] = useState(() =>
-		readStoredValue(STORAGE_KEYS.city, "上海"),
+		readStoredValue(STORAGE_KEYS.city, DEFAULT_CITY),
 	);
 	const [query, setQuery] = useState("");
 	const [activePage, setActivePage] = useState<PageId>("home");
 	const [activeTool, setActiveTool] = useState<ToolId>("translate");
 	const [searchProvider, setSearchProvider] = useState<SearchProviderId>(
 		() =>
-			readStoredValue(STORAGE_KEYS.searchProvider, "site") as SearchProviderId,
+			readStoredValue(
+				STORAGE_KEYS.searchProvider,
+				DEFAULT_SEARCH_PROVIDER,
+			) as SearchProviderId,
 	);
 	const [chromeTheme, setChromeTheme] = useState<ChromeTheme>(
-		() => readStoredValue(STORAGE_KEYS.chromeTheme, "minimal") as ChromeTheme,
+		() =>
+			readStoredValue(
+				STORAGE_KEYS.chromeTheme,
+				DEFAULT_CHROME_THEME,
+			) as ChromeTheme,
 	);
 	const [colorTheme, setColorTheme] = useState<ColorTheme>(
-		() => readStoredValue(STORAGE_KEYS.colorTheme, "light") as ColorTheme,
+		() =>
+			readStoredValue(STORAGE_KEYS.colorTheme, DEFAULT_COLOR_THEME) as ColorTheme,
 	);
 	const [hotTab, setHotTab] = useState(hotTabs[1]);
 	const [avatar, setAvatar] = useState<AvatarState>(() =>
-		readStoredJson(STORAGE_KEYS.avatar, { mode: "default" }),
+		readStoredJson(STORAGE_KEYS.avatar, DEFAULT_AVATAR_STATE),
 	);
 	const [wallpaper, setWallpaper] = useState<WallpaperState>(() =>
-		readStoredJson(STORAGE_KEYS.wallpaper, { mode: "default" }),
+		readStoredJson(STORAGE_KEYS.wallpaper, DEFAULT_WALLPAPER_STATE),
 	);
 	const [settings, setSettings] = useState<SettingsState>(() =>
-		readStoredJson(STORAGE_KEYS.settings, {
-			showWeather: true,
-			showHot: true,
-			showNews: true,
-			autoRefresh: true,
-		}),
+		readStoredJson(STORAGE_KEYS.settings, DEFAULT_SETTINGS_STATE),
 	);
 	const [homeCardLayout, setHomeCardLayout] = useState<HomeCardLayout>(() =>
 		normalizeHomeCardLayout(
@@ -258,6 +406,84 @@ export function App() {
 	useEffect(() => {
 		writeStoredJson(STORAGE_KEYS.wallpaper, wallpaper);
 	}, [wallpaper]);
+
+	const applyImportedSettings = (config: ExportedSettings) => {
+		setApiBase(config.apiBase);
+		setCity(config.city);
+		setSearchProvider(config.searchProvider);
+		setChromeTheme(config.chromeTheme);
+		setColorTheme(config.colorTheme);
+		setWallpaper(config.wallpaper);
+		setAvatar(config.avatar);
+		setSettings(config.modules);
+		setHomeCardLayout(config.homeCardLayout);
+	};
+
+	const exportConfig = (): ConfigActionResult => {
+		const exportWallpaper =
+			wallpaper.mode === "custom"
+				? DEFAULT_WALLPAPER_STATE
+				: { mode: wallpaper.mode };
+		const payload = {
+			app: "60s-web",
+			version: CONFIG_EXPORT_VERSION,
+			exportedAt: new Date().toISOString(),
+			settings: {
+				apiBase,
+				city,
+				searchProvider,
+				chromeTheme,
+				colorTheme,
+				wallpaper: exportWallpaper,
+				avatar: DEFAULT_AVATAR_STATE,
+				modules: settings,
+				homeCardLayout: normalizeHomeCardLayout(homeCardLayout),
+			},
+		};
+		const blob = new Blob([JSON.stringify(payload, null, 2)], {
+			type: "application/json",
+		});
+		const url = URL.createObjectURL(blob);
+		const link = document.createElement("a");
+		link.href = url;
+		link.download = `60s-web-config-${new Date().toISOString().slice(0, 10)}.json`;
+		link.click();
+		window.setTimeout(() => URL.revokeObjectURL(url), 0);
+		return {
+			ok: true,
+			message: "配置已导出，本地头像、QQ 号和自定义壁纸不会写入文件。",
+		};
+	};
+
+	const importConfig = (raw: string): ConfigActionResult => {
+		try {
+			const config = parseImportedConfig(raw);
+			applyImportedSettings(config);
+			return { ok: true, message: "配置已导入，页面设置已更新。" };
+		} catch (error) {
+			return {
+				ok: false,
+				message:
+					error instanceof Error ? error.message : "配置导入失败，请检查文件。",
+			};
+		}
+	};
+
+	const resetConfig = (): ConfigActionResult => {
+		clearStoredPrefix("60s-web:");
+		applyImportedSettings({
+			apiBase: DEFAULT_API_BASE,
+			city: DEFAULT_CITY,
+			searchProvider: DEFAULT_SEARCH_PROVIDER,
+			chromeTheme: DEFAULT_CHROME_THEME,
+			colorTheme: DEFAULT_COLOR_THEME,
+			wallpaper: DEFAULT_WALLPAPER_STATE,
+			avatar: DEFAULT_AVATAR_STATE,
+			modules: DEFAULT_SETTINGS_STATE,
+			homeCardLayout: normalizeHomeCardLayout(defaultHomeCardLayout),
+		});
+		return { ok: true, message: "已恢复默认设置，并清理本地缓存。" };
+	};
 
 	const reloadAll = () => {
 		daily.reload();
@@ -444,6 +670,9 @@ export function App() {
 							setChromeTheme={setChromeTheme}
 							colorTheme={colorTheme}
 							setColorTheme={setColorTheme}
+							onExportConfig={exportConfig}
+							onImportConfig={importConfig}
+							onResetConfig={resetConfig}
 						/>
 					</section>
 				)}
@@ -463,17 +692,20 @@ function SearchResults({
 }) {
 	return (
 		<div className="search-results">
-			{matches.map((endpoint) => (
-				<a
-					key={endpoint.id}
-					href={buildUrl(base, endpoint.path, defaults(endpoint))}
-					target="_blank"
-					rel="noreferrer"
-				>
-					<span>{endpoint.name}</span>
-					<small>{endpoint.path}</small>
-				</a>
-			))}
+			{matches.map((endpoint) => {
+				const href = tryBuildUrl(base, endpoint.path, defaults(endpoint));
+				return href ? (
+					<a key={endpoint.id} href={href} target="_blank" rel="noreferrer">
+						<span>{endpoint.name}</span>
+						<small>{endpoint.path}</small>
+					</a>
+				) : (
+					<span className="disabled-result" key={endpoint.id}>
+						<span>{endpoint.name}</span>
+						<small>API 地址无效</small>
+					</span>
+				);
+			})}
 		</div>
 	);
 }

@@ -966,8 +966,9 @@ export function buildUrl(
 	path: string,
 	params: Record<string, string | undefined> = {},
 ) {
-	const cleanBase = base.replace(/\/$/, "");
-	const url = new URL(`${cleanBase}${path}`);
+	const cleanBase = normalizeApiBase(base);
+	const cleanPath = path.startsWith("/") ? path : `/${path}`;
+	const url = new URL(`${cleanBase}${cleanPath}`);
 
 	for (const [key, value] of Object.entries(params)) {
 		if (value !== undefined && value !== "") {
@@ -976,6 +977,48 @@ export function buildUrl(
 	}
 
 	return url.toString();
+}
+
+export function normalizeApiBase(base: string) {
+	const cleanBase = base.trim().replace(/\/+$/, "");
+	if (!cleanBase) {
+		throw new Error("请输入 API 地址");
+	}
+
+	let url: URL;
+	try {
+		url = new URL(cleanBase);
+	} catch {
+		throw new Error("API 地址格式无效，请输入完整的 http(s) 地址");
+	}
+
+	if (url.protocol !== "http:" && url.protocol !== "https:") {
+		throw new Error("API 地址仅支持 http 或 https");
+	}
+
+	const path = url.pathname.replace(/\/+$/, "");
+	return `${url.origin}${path === "/" ? "" : path}`;
+}
+
+export function getApiBaseError(base: string) {
+	try {
+		normalizeApiBase(base);
+		return "";
+	} catch (error) {
+		return error instanceof Error ? error.message : "API 地址无效";
+	}
+}
+
+export function tryBuildUrl(
+	base: string,
+	path: string,
+	params: Record<string, string | undefined> = {},
+) {
+	try {
+		return buildUrl(base, path, params);
+	} catch {
+		return "";
+	}
 }
 
 export async function fetchApi<T = unknown>(

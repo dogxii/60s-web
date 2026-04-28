@@ -8,13 +8,13 @@ import {
 	ShieldCheck,
 } from "lucide-react";
 import {
-	buildUrl,
 	type EpicGame,
 	type ExchangeRate,
 	formatHotValue,
 	type FuelPrice,
 	type GoldPrice,
 	type HotItem,
+	tryBuildUrl,
 } from "../api";
 import {
 	API_REPO_URL,
@@ -165,21 +165,24 @@ export function ToolShortcuts({
 				{toolDefinitions.map((tool) => {
 					const Icon = tool.icon;
 					const hrefMap: Record<ToolId, string> = {
-						translate: buildUrl(apiBase, "/fanyi", {
+						translate: tryBuildUrl(apiBase, "/fanyi", {
 							text: "你好，世界",
 							from: "auto",
 							to: "en",
 						}),
-						qrcode: buildUrl(apiBase, "/qrcode", {
+						qrcode: tryBuildUrl(apiBase, "/qrcode", {
 							text: API_REPO_URL,
 							encoding: "json",
 						}),
-						password: buildUrl(apiBase, "/password", {
+						password: tryBuildUrl(apiBase, "/password", {
 							length: "18",
 							symbols: "true",
 						}),
-						palette: buildUrl(apiBase, "/color/palette", { color: "#0f9b8e" }),
+						palette: tryBuildUrl(apiBase, "/color/palette", {
+							color: "#0f9b8e",
+						}),
 					};
+					const href = hrefMap[tool.id];
 
 					return setActivePage && setActiveTool ? (
 						<button
@@ -197,10 +200,10 @@ export function ToolShortcuts({
 								<small>{tool.sub}</small>
 							</span>
 						</button>
-					) : (
+					) : href ? (
 						<a
 							key={tool.id}
-							href={hrefMap[tool.id]}
+							href={href}
 							target="_blank"
 							rel="noreferrer"
 						>
@@ -210,6 +213,14 @@ export function ToolShortcuts({
 								<small>{tool.sub}</small>
 							</span>
 						</a>
+					) : (
+						<button key={tool.id} type="button" disabled>
+							<Icon size={24} />
+							<span>
+								<b>{tool.label}</b>
+								<small>API 地址无效</small>
+							</span>
+						</button>
 					);
 				})}
 			</div>

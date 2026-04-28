@@ -1,5 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { buildUrl, fetchApi, unwrap } from "../api";
+import {
+	fetchApi,
+	getApiBaseError,
+	tryBuildUrl,
+	unwrap,
+} from "../api";
 import { CACHE_TTL } from "../config";
 import { readCache, writeCache } from "../storage";
 import type { ApiState } from "../types";
@@ -16,12 +21,22 @@ export function useApi<T>(
 		() => JSON.parse(paramsKey) as Record<string, string | undefined>,
 		[paramsKey],
 	);
-	const cacheKey = useMemo(
-		() => `60s-web:cache:${buildUrl(base, path, stableParams)}`,
+	const requestUrl = useMemo(
+		() => tryBuildUrl(base, path, stableParams),
 		[base, path, stableParams],
+	);
+	const cacheKey = useMemo(
+		() => (requestUrl ? `60s-web:cache:${requestUrl}` : ""),
+		[requestUrl],
 	);
 	const [state, setState] = useState<ApiState<T>>(() => {
 		if (!enabled || typeof window === "undefined") return { loading: enabled };
+		if (!requestUrl) {
+			return {
+				loading: false,
+				error: getApiBaseError(base) || "API 地址无效",
+			};
+		}
 		const cached = readCache<T>(cacheKey);
 		if (!cached) return { loading: true };
 		return {
@@ -34,6 +49,13 @@ export function useApi<T>(
 	const load = useCallback(
 		async (force = false) => {
 			if (!enabled) return;
+			if (!requestUrl) {
+				setState({
+					loading: false,
+					error: getApiBaseError(base) || "API 地址无效",
+				});
+				return;
+			}
 			if (!force) {
 				const cached = readCache<T>(cacheKey);
 				if (cached) {
@@ -66,7 +88,7 @@ export function useApi<T>(
 				}));
 			}
 		},
-		[base, cacheKey, enabled, path, stableParams],
+		[base, cacheKey, enabled, path, requestUrl, stableParams],
 	);
 
 	useEffect(() => {

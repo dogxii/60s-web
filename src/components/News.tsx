@@ -4,6 +4,7 @@ import {
 	type DailyNews,
 	DEFAULT_API_BASE,
 	toItems,
+	tryBuildUrl,
 } from "../api";
 import { useApi } from "../hooks/useApi";
 import type { ApiState } from "../types";
@@ -17,19 +18,20 @@ export function NewsPage({
 	apiBase: string;
 	daily: ApiState<DailyNews> & { reload: () => void };
 }) {
+	const markdownUrl = tryBuildUrl(apiBase, "/60s", { encoding: "markdown" });
 	return (
 		<section className="page-stack">
 			<div className="page-title">
 				<span>
 					<Newspaper size={24} /> 新闻资讯
 				</span>
-				<a
-					href={buildUrl(apiBase, "/60s", { encoding: "markdown" })}
-					target="_blank"
-					rel="noreferrer"
-				>
-					Markdown <ExternalLink size={15} />
-				</a>
+				{markdownUrl ? (
+					<a href={markdownUrl} target="_blank" rel="noreferrer">
+						Markdown <ExternalLink size={15} />
+					</a>
+				) : (
+					<span className="disabled-link">API 地址无效</span>
+				)}
 			</div>
 			<div className="news-page-grid">
 				<DailyCard state={daily} />
