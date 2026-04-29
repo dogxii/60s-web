@@ -39,6 +39,7 @@ import { MarketStrip } from "./components/HomeCards";
 import { HomePage } from "./components/HomePage";
 import { MobileBottomNav } from "./components/MobileBottomNav";
 import { NewsPage } from "./components/News";
+import { PwaStatusBar } from "./components/PwaStatusBar";
 import { SettingsPanel } from "./components/SettingsPanel";
 import { ToolWorkspace } from "./components/ToolWorkspace";
 import { WeatherPage } from "./components/Weather";
@@ -80,6 +81,11 @@ import {
 	defaults,
 	getWallpaperStyle,
 } from "./utils";
+import {
+	applyServiceWorkerUpdate,
+	registerServiceWorker,
+	shouldShowIosInstallHint,
+} from "./pwa";
 
 const DEFAULT_CITY = "上海";
 const DEFAULT_SEARCH_PROVIDER: SearchProviderId = "site";
@@ -290,6 +296,12 @@ export function App() {
 			readStoredJson(STORAGE_KEYS.endpointFavorites, []),
 		),
 	);
+	const [isOffline, setIsOffline] = useState(() =>
+		typeof navigator === "undefined" ? false : !navigator.onLine,
+	);
+	const [serviceWorkerUpdate, setServiceWorkerUpdate] =
+		useState<ServiceWorkerRegistration | null>(null);
+	const [showInstallHint, setShowInstallHint] = useState(false);
 
 	const daily = useApi<DailyNews>(
 		apiBase,
@@ -424,6 +436,23 @@ export function App() {
 	useEffect(() => {
 		writeStoredValue(STORAGE_KEYS.colorTheme, colorTheme);
 	}, [colorTheme]);
+
+	useEffect(() => {
+		const updateOnlineState = () => setIsOffline(!navigator.onLine);
+		window.addEventListener("online", updateOnlineState);
+		window.addEventListener("offline", updateOnlineState);
+		updateOnlineState();
+		return () => {
+			window.removeEventListener("online", updateOnlineState);
+			window.removeEventListener("offline", updateOnlineState);
+		};
+	}, []);
+
+	useEffect(() => registerServiceWorker(setServiceWorkerUpdate), []);
+
+	useEffect(() => {
+		setShowInstallHint(shouldShowIosInstallHint());
+	}, []);
 
 	useEffect(() => {
 		const themeColor = colorTheme === "dark" ? "#07100f" : "#ffffff";
@@ -565,6 +594,16 @@ export function App() {
 				setAvatar={setAvatar}
 				colorTheme={colorTheme}
 				setColorTheme={setColorTheme}
+			/>
+			<PwaStatusBar
+				isOffline={isOffline}
+				updateReady={Boolean(serviceWorkerUpdate)}
+				showInstallHint={showInstallHint}
+				onApplyUpdate={() => {
+					applyServiceWorkerUpdate(serviceWorkerUpdate);
+					setServiceWorkerUpdate(null);
+				}}
+				onDismissInstallHint={() => setShowInstallHint(false)}
 			/>
 
 			<main>
@@ -718,7 +757,11 @@ export function App() {
 				)}
 			</main>
 
-			<Footer apiBase={apiBase} updatedAt={daily.updatedAt} />
+			<Footer
+				apiBase={apiBase}
+				updatedAt={daily.updatedAt}
+				isOffline={isOffline}
+			/>
 			<MobileBottomNav activePage={activePage} setActivePage={setActivePage} />
 		</div>
 	);

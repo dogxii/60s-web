@@ -101,7 +101,15 @@ export function WeatherIcon({
 	);
 }
 
-export function Footer({ apiBase, updatedAt }: { apiBase: string; updatedAt?: Date }) {
+export function Footer({
+	apiBase,
+	updatedAt,
+	isOffline = false,
+}: {
+	apiBase: string;
+	updatedAt?: Date;
+	isOffline?: boolean;
+}) {
 	return (
 		<footer>
 			<div className="footer-inner">
@@ -135,9 +143,9 @@ export function Footer({ apiBase, updatedAt }: { apiBase: string; updatedAt?: Da
 					</span>
 				</div>
 				<div className="footer-right">
-					<span className="footer-meta ok">
+					<span className={`footer-meta ${isOffline ? "error" : "ok"}`}>
 						<strong>状态</strong>
-						正常
+						{isOffline ? "离线" : "正常"}
 					</span>
 					<span className="footer-dot" />
 					<span className="footer-meta version">

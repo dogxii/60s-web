@@ -17,13 +17,22 @@ export function MobileBottomNav({
 				.map((item) => {
 					const Icon = item.icon;
 					const active = activePage === item.id;
+					const handleClick = () => {
+						setActivePage(item.id);
+						window.requestAnimationFrame(() => {
+							window.scrollTo({
+								top: 0,
+								behavior: active ? "smooth" : "auto",
+							});
+						});
+					};
 					return (
 						<button
 							key={item.id}
 							type="button"
 							className={active ? "active" : ""}
 							aria-current={active ? "page" : undefined}
-							onClick={() => setActivePage(item.id)}
+							onClick={handleClick}
 						>
 							<Icon size={21} />
 							<span>{item.label}</span>
