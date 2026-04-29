@@ -1,12 +1,4 @@
-import {
-	CalendarClock,
-	CloudSun,
-	Coins,
-	Flame,
-	LayoutGrid,
-	QrCode,
-	Search,
-} from "lucide-react";
+import { LayoutGrid, Search } from "lucide-react";
 import {
 	useEffect,
 	useMemo,
@@ -51,7 +43,9 @@ import {
 	categoryLabels,
 	chromeThemes,
 	colorThemes,
+	defaultQuickFavorites,
 	hotTabs,
+	quickActions,
 	searchProviders,
 	STORAGE_KEYS,
 	wallpaperOptions,
@@ -71,6 +65,8 @@ import type {
 	ColorTheme,
 	EndpointFavoriteId,
 	PageId,
+	QuickActionDefinition,
+	QuickFavoriteId,
 	SearchProviderId,
 	SettingsState,
 	ToolId,
@@ -117,6 +113,7 @@ type ExportedSettings = {
 	modules: SettingsState;
 	homeCardLayout: HomeCardLayout;
 	endpointFavorites: EndpointFavoriteId[];
+	quickFavorites: QuickFavoriteId[];
 };
 
 function normalizeEndpointFavorites(value: unknown): EndpointFavoriteId[] {
@@ -131,6 +128,28 @@ function normalizeEndpointFavorites(value: unknown): EndpointFavoriteId[] {
 		}
 		assigned.add(item);
 		favorites.push(item);
+	}
+
+	return favorites;
+}
+
+function normalizeQuickFavorites(
+	value: unknown,
+	fallback: QuickFavoriteId[] = defaultQuickFavorites,
+): QuickFavoriteId[] {
+	if (value === undefined || !Array.isArray(value)) return [...fallback];
+	const knownIds = new Set(quickActions.map((action) => action.id));
+	const assigned = new Set<string>();
+	const favorites: QuickFavoriteId[] = [];
+
+	for (const item of value) {
+		if (typeof item !== "string") continue;
+		const id = item as QuickFavoriteId;
+		if (!knownIds.has(id) || assigned.has(id)) {
+			continue;
+		}
+		assigned.add(id);
+		favorites.push(id);
 	}
 
 	return favorites;
@@ -243,6 +262,7 @@ function parseImportedConfig(raw: string): ExportedSettings {
 			isRecord(config.homeCardLayout) ? config.homeCardLayout : undefined,
 		),
 		endpointFavorites: normalizeEndpointFavorites(config.endpointFavorites),
+		quickFavorites: normalizeQuickFavorites(config.quickFavorites),
 	};
 }
 
@@ -294,6 +314,11 @@ export function App() {
 	>(() =>
 		normalizeEndpointFavorites(
 			readStoredJson(STORAGE_KEYS.endpointFavorites, []),
+		),
+	);
+	const [quickFavorites, setQuickFavorites] = useState<QuickFavoriteId[]>(() =>
+		normalizeQuickFavorites(
+			readStoredJson(STORAGE_KEYS.quickFavorites, defaultQuickFavorites),
 		),
 	);
 	const [isOffline, setIsOffline] = useState(() =>
@@ -422,6 +447,13 @@ export function App() {
 	}, [endpointFavorites]);
 
 	useEffect(() => {
+		writeStoredJson(
+			STORAGE_KEYS.quickFavorites,
+			normalizeQuickFavorites(quickFavorites, []),
+		);
+	}, [quickFavorites]);
+
+	useEffect(() => {
 		writeStoredJson(STORAGE_KEYS.avatar, avatar);
 	}, [avatar]);
 
@@ -482,6 +514,7 @@ export function App() {
 		setSettings(config.modules);
 		setHomeCardLayout(config.homeCardLayout);
 		setEndpointFavorites(config.endpointFavorites);
+		setQuickFavorites(config.quickFavorites);
 	};
 
 	const exportConfig = (): ConfigActionResult => {
@@ -504,6 +537,7 @@ export function App() {
 				modules: settings,
 				homeCardLayout: normalizeHomeCardLayout(homeCardLayout),
 				endpointFavorites: normalizeEndpointFavorites(endpointFavorites),
+				quickFavorites: normalizeQuickFavorites(quickFavorites, []),
 			},
 		};
 		const blob = new Blob([JSON.stringify(payload, null, 2)], {
@@ -548,8 +582,25 @@ export function App() {
 			modules: DEFAULT_SETTINGS_STATE,
 			homeCardLayout: normalizeHomeCardLayout(defaultHomeCardLayout),
 			endpointFavorites: [],
+			quickFavorites: defaultQuickFavorites,
 		});
 		return { ok: true, message: "已恢复默认设置，并清理本地缓存。" };
+	};
+
+	const runQuickAction = (action: QuickActionDefinition) => {
+		const target = action.target;
+		if (target.page === "hot") {
+			const tab = hotTabs.find((item) => item.id === target.hotTabId);
+			if (tab) setHotTab(tab);
+			setActivePage("hot");
+			return;
+		}
+		if (target.page === "tools") {
+			if (target.toolId) setActiveTool(target.toolId);
+			setActivePage("tools");
+			return;
+		}
+		setActivePage(target.page);
 	};
 
 	const reloadAll = () => {
@@ -640,44 +691,11 @@ export function App() {
 							</button>
 						))}
 					</div>
-					<div className="quick-chips" aria-label="快捷入口">
-						<button onClick={() => setActivePage("news")}>
-							<CalendarClock size={17} /> 今日60秒
-						</button>
-						<button
-							onClick={() => {
-								setHotTab(hotTabs[0]);
-								setActivePage("hot");
-							}}
-						>
-							<Flame size={17} /> 微博热搜
-						</button>
-						<button
-							onClick={() => {
-								setHotTab(hotTabs[1]);
-								setActivePage("hot");
-							}}
-						>
-							<span className="chip-symbol">知</span> 知乎热榜
-						</button>
-						<button
-							onClick={() => {
-								setHotTab(hotTabs[2]);
-								setActivePage("hot");
-							}}
-						>
-							<span className="chip-symbol pink">B</span> B站热榜
-						</button>
-						<button onClick={() => setActivePage("weather")}>
-							<CloudSun size={17} /> 天气
-						</button>
-						<button onClick={() => setActivePage("tools")}>
-							<Coins size={17} /> 金价
-						</button>
-						<button onClick={() => setActivePage("tools")}>
-							<QrCode size={17} /> 工具
-						</button>
-					</div>
+					<QuickChips
+						favorites={quickFavorites}
+						onAction={runQuickAction}
+						onManage={() => setActivePage("settings")}
+					/>
 					{searchMatches.length > 0 && (
 						<SearchResults base={apiBase} matches={searchMatches} />
 					)}
@@ -752,6 +770,11 @@ export function App() {
 							onExportConfig={exportConfig}
 							onImportConfig={importConfig}
 							onResetConfig={resetConfig}
+							quickFavorites={quickFavorites}
+							setQuickFavorites={setQuickFavorites}
+							onResetQuickFavorites={() =>
+								setQuickFavorites([...defaultQuickFavorites])
+							}
 						/>
 					</section>
 				)}
@@ -763,6 +786,50 @@ export function App() {
 				isOffline={isOffline}
 			/>
 			<MobileBottomNav activePage={activePage} setActivePage={setActivePage} />
+		</div>
+	);
+}
+
+function QuickChips({
+	favorites,
+	onAction,
+	onManage,
+}: {
+	favorites: QuickFavoriteId[];
+	onAction: (action: QuickActionDefinition) => void;
+	onManage: () => void;
+}) {
+	const actions = favorites
+		.map((id) => quickActions.find((action) => action.id === id))
+		.filter((action): action is QuickActionDefinition => Boolean(action));
+
+	return (
+		<div className="quick-chips" aria-label="快捷入口">
+			{actions.length > 0 ? (
+				actions.map((action) => {
+					const Icon = action.icon;
+					return (
+						<button
+							key={action.id}
+							type="button"
+							onClick={() => onAction(action)}
+						>
+							{Icon ? (
+								<Icon size={17} />
+							) : (
+								<span className={`chip-symbol ${action.symbolTone || ""}`}>
+									{action.symbol}
+								</span>
+							)}
+							{action.label}
+						</button>
+					);
+				})
+			) : (
+				<button type="button" className="manage-chip" onClick={onManage}>
+					<LayoutGrid size={17} /> 管理快捷入口
+				</button>
+			)}
 		</div>
 	);
 }

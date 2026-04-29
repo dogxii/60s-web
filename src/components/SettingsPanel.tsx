@@ -9,15 +9,18 @@ import {
 	Moon,
 	RotateCcw,
 	Settings,
+	Star,
 	Sun,
 	Wifi,
 } from "lucide-react";
 import { useRef, useState } from "react";
 import { fetchApi, getApiBaseError } from "../api";
-import { chromeThemes, colorThemes, wallpaperOptions } from "../config";
+import { chromeThemes, colorThemes, quickActions, wallpaperOptions } from "../config";
 import type {
 	ChromeTheme,
 	ColorTheme,
+	QuickActionDefinition,
+	QuickFavoriteId,
 	SettingsState,
 	WallpaperState,
 } from "../types";
@@ -42,6 +45,9 @@ export function SettingsPanel({
 	onExportConfig,
 	onImportConfig,
 	onResetConfig,
+	quickFavorites,
+	setQuickFavorites,
+	onResetQuickFavorites,
 	compact = false,
 }: {
 	apiBase: string;
@@ -57,6 +63,9 @@ export function SettingsPanel({
 	onExportConfig?: () => ConfigActionResult;
 	onImportConfig?: (raw: string) => ConfigActionResult;
 	onResetConfig?: () => ConfigActionResult;
+	quickFavorites?: QuickFavoriteId[];
+	setQuickFavorites?: (favorites: QuickFavoriteId[]) => void;
+	onResetQuickFavorites?: () => void;
 	compact?: boolean;
 }) {
 	const wallpaperInputRef = useRef<HTMLInputElement | null>(null);
@@ -68,6 +77,7 @@ export function SettingsPanel({
 	const [configNotice, setConfigNotice] = useState<ConfigActionResult | null>(
 		null,
 	);
+	const favoriteQuickSet = new Set(quickFavorites || []);
 	const handleWallpaperFile = (file?: File) => {
 		if (!file || !setWallpaper) return;
 		if (!file.type.startsWith("image/")) return;
@@ -141,6 +151,15 @@ export function SettingsPanel({
 		if (!confirmed) return;
 		setApiCheck({ status: "idle", message: "" });
 		setConfigNotice(onResetConfig());
+	};
+
+	const toggleQuickFavorite = (action: QuickActionDefinition) => {
+		if (!quickFavorites || !setQuickFavorites) return;
+		if (favoriteQuickSet.has(action.id)) {
+			setQuickFavorites(quickFavorites.filter((id) => id !== action.id));
+			return;
+		}
+		setQuickFavorites([...quickFavorites, action.id]);
 	};
 
 	return (
@@ -298,6 +317,53 @@ export function SettingsPanel({
 						hidden
 						onChange={(event) => handleWallpaperFile(event.target.files?.[0])}
 					/>
+				</div>
+			)}
+			{!compact && quickFavorites && setQuickFavorites && (
+				<div className="quick-settings">
+					<div className="settings-subtitle">
+						<span>
+							<Star size={18} /> 快捷入口
+						</span>
+						<small>{quickFavorites.length} 个收藏，显示在首页搜索下方</small>
+					</div>
+					<div className="quick-settings-grid">
+						{quickActions.map((action) => {
+							const Icon = action.icon;
+							const active = favoriteQuickSet.has(action.id);
+							return (
+								<button
+									type="button"
+									key={action.id}
+									className={active ? "active" : ""}
+									onClick={() => toggleQuickFavorite(action)}
+									aria-pressed={active}
+								>
+									{Icon ? (
+										<Icon size={19} />
+									) : (
+										<i className={`chip-symbol ${action.symbolTone || ""}`}>
+											{action.symbol}
+										</i>
+									)}
+									<span>
+										<b>{action.label}</b>
+										<small>{action.sub}</small>
+									</span>
+									<Star size={16} className="quick-star" />
+								</button>
+							);
+						})}
+					</div>
+					{onResetQuickFavorites && (
+						<button
+							type="button"
+							className="quick-reset-button"
+							onClick={onResetQuickFavorites}
+						>
+							<RotateCcw size={16} /> 恢复默认快捷入口
+						</button>
+					)}
 				</div>
 			)}
 			{!compact && onExportConfig && onImportConfig && onResetConfig && (

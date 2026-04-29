@@ -2192,6 +2192,74 @@ main {
 	object-fit: cover;
 }
 
+.quick-settings {
+	border-top: 1px solid var(--line);
+}
+
+.quick-settings-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+	gap: 12px;
+	padding: 0 14px 12px;
+}
+
+.quick-settings-grid button {
+	display: grid;
+	grid-template-columns: 28px minmax(0, 1fr) 24px;
+	align-items: center;
+	gap: 10px;
+	min-height: 68px;
+	padding: 11px 12px;
+	border: 1px solid var(--line);
+	border-radius: 8px;
+	background: var(--surface-strong);
+	color: var(--heading);
+	text-align: left;
+}
+
+.quick-settings-grid button.active {
+	border-color: rgba(15, 155, 142, 0.38);
+	background: #f2fbf9;
+	box-shadow: 0 8px 22px rgba(15, 155, 142, 0.08);
+}
+
+.quick-settings-grid b,
+.quick-settings-grid small {
+	display: block;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.quick-settings-grid small {
+	margin-top: 4px;
+	color: var(--muted);
+}
+
+.quick-star {
+	justify-self: end;
+	color: var(--muted);
+}
+
+.quick-settings-grid button.active .quick-star {
+	fill: currentColor;
+	color: #d97706;
+}
+
+.quick-reset-button {
+	min-height: 34px;
+	display: inline-flex;
+	align-items: center;
+	gap: 7px;
+	margin: 0 14px 16px auto;
+	padding: 0 13px;
+	border: 1px solid var(--line);
+	border-radius: 999px;
+	background: var(--surface-strong);
+	color: var(--accent-dark);
+	font-weight: 800;
+}
+
 .config-settings {
 	border-top: 1px solid var(--line);
 }
@@ -3046,6 +3114,7 @@ footer strong {
 .theme-dark .pwa-status-strip button.icon-only,
 .theme-dark .qr-preview,
 .theme-dark .quick-chips button,
+.theme-dark .quick-settings-grid button,
 .theme-dark .search-providers,
 .theme-dark .search-providers button.active,
 .theme-dark .switch-row,
@@ -3144,6 +3213,7 @@ footer strong {
 .theme-dark .chrome-theme-grid button,
 .theme-dark .config-action-grid button,
 .theme-dark .color-theme-grid button,
+.theme-dark .quick-settings-grid button,
 .theme-dark .wallpaper-grid button {
 	background: var(--surface-strong);
 	color: var(--heading);
@@ -3151,6 +3221,7 @@ footer strong {
 
 .theme-dark .chrome-theme-grid button.active,
 .theme-dark .color-theme-grid button.active,
+.theme-dark .quick-settings-grid button.active,
 .theme-dark .wallpaper-grid button.active {
 	background: rgba(55, 216, 197, 0.12);
 	border-color: rgba(55, 216, 197, 0.38);
@@ -3619,6 +3690,7 @@ footer strong {
 	.color-theme-grid,
 	.chrome-theme-grid,
 	.config-action-grid,
+	.quick-settings-grid,
 	.wallpaper-grid,
 	.weather-detail-grid,
 	.multi-board-grid,

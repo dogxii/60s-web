@@ -18,6 +18,18 @@ export type PageId = "home" | "hot" | "news" | "weather" | "tools" | "settings";
 export type ToolId = "translate" | "qrcode" | "password" | "palette";
 export type SearchProviderId = "site" | "bing" | "google" | "chatgpt" | "doubao";
 export type EndpointFavoriteId = string;
+export type QuickFavoriteId =
+	| "daily"
+	| "hot-weibo"
+	| "hot-zhihu"
+	| "hot-bili"
+	| "weather"
+	| "gold"
+	| "tools"
+	| "tool-translate"
+	| "tool-qrcode"
+	| "tool-password"
+	| "tool-palette";
 export type WallpaperMode = "default" | "mint" | "paper" | "dawn" | "custom";
 export type ChromeTheme = "classic" | "floating" | "minimal";
 export type ColorTheme = "light" | "dark";
@@ -40,4 +52,17 @@ export type ToolDefinition = {
 	icon: LucideIcon;
 	label: string;
 	sub: string;
+};
+
+export type QuickActionDefinition = {
+	id: QuickFavoriteId;
+	label: string;
+	sub: string;
+	icon?: LucideIcon;
+	symbol?: string;
+	symbolTone?: "blue" | "pink";
+	target:
+		| { page: "news" | "weather" | "settings" }
+		| { page: "hot"; hotTabId: string }
+		| { page: "tools"; toolId?: ToolId };
 };

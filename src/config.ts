@@ -2,6 +2,7 @@ import {
 	BarChart3,
 	CalendarClock,
 	CloudSun,
+	Coins,
 	Flame,
 	Gauge,
 	Home,
@@ -20,6 +21,8 @@ import type { EndpointDefinition } from "./api";
 import type {
 	ChromeTheme,
 	ColorTheme,
+	QuickActionDefinition,
+	QuickFavoriteId,
 	SearchProviderId,
 	ToolDefinition,
 	WallpaperMode,
@@ -38,6 +41,7 @@ export const STORAGE_KEYS = {
 	colorTheme: "60s-web:color-theme",
 	homeCardLayout: "60s-web:home-card-layout",
 	endpointFavorites: "60s-web:endpoint-favorites",
+	quickFavorites: "60s-web:quick-favorites",
 } as const;
 
 export const nav = [
@@ -55,6 +59,98 @@ export const hotTabs = [
 	{ id: "bili", label: "B站", path: "/bili" },
 	{ id: "douyin", label: "抖音", path: "/douyin" },
 	{ id: "toutiao", label: "头条", path: "/toutiao" },
+];
+
+export const defaultQuickFavorites: QuickFavoriteId[] = [
+	"daily",
+	"hot-weibo",
+	"hot-zhihu",
+	"hot-bili",
+	"weather",
+	"gold",
+	"tools",
+];
+
+export const quickActions: QuickActionDefinition[] = [
+	{
+		id: "daily",
+		label: "今日60秒",
+		sub: "每日简报",
+		icon: CalendarClock,
+		target: { page: "news" },
+	},
+	{
+		id: "hot-weibo",
+		label: "微博热搜",
+		sub: "热榜",
+		icon: Flame,
+		target: { page: "hot", hotTabId: "weibo" },
+	},
+	{
+		id: "hot-zhihu",
+		label: "知乎热榜",
+		sub: "热榜",
+		symbol: "知",
+		symbolTone: "blue",
+		target: { page: "hot", hotTabId: "zhihu" },
+	},
+	{
+		id: "hot-bili",
+		label: "B站热榜",
+		sub: "热榜",
+		symbol: "B",
+		symbolTone: "pink",
+		target: { page: "hot", hotTabId: "bili" },
+	},
+	{
+		id: "weather",
+		label: "天气",
+		sub: "城市天气",
+		icon: CloudSun,
+		target: { page: "weather" },
+	},
+	{
+		id: "gold",
+		label: "金价",
+		sub: "实用数据",
+		icon: Coins,
+		target: { page: "tools" },
+	},
+	{
+		id: "tools",
+		label: "工具",
+		sub: "工具中心",
+		icon: LayoutGrid,
+		target: { page: "tools" },
+	},
+	{
+		id: "tool-translate",
+		label: "翻译",
+		sub: "多语言互译",
+		icon: Languages,
+		target: { page: "tools", toolId: "translate" },
+	},
+	{
+		id: "tool-qrcode",
+		label: "二维码",
+		sub: "生成与预览",
+		icon: QrCode,
+		target: { page: "tools", toolId: "qrcode" },
+	},
+	{
+		id: "tool-password",
+		label: "密码",
+		sub: "生成强密码",
+		icon: KeyRound,
+		target: { page: "tools", toolId: "password" },
+	},
+	{
+		id: "tool-palette",
+		label: "配色",
+		sub: "色彩搭配",
+		icon: Palette,
+		target: { page: "tools", toolId: "palette" },
+	},
 ];
 
 export const searchProviders: Array<{
