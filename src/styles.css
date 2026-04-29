@@ -3473,7 +3473,7 @@ footer strong {
 	}
 
 	.app-shell.mobile-nav-bottom {
-		--mobile-nav-height: 78px;
+		--mobile-nav-height: calc(78px + env(safe-area-inset-bottom, 0px));
 	}
 
 	.topbar {
@@ -3588,17 +3588,29 @@ footer strong {
 		left: 10px;
 		right: 10px;
 		bottom: 8px;
+		bottom: max(8px, env(safe-area-inset-bottom, 0px));
 		z-index: 30;
 		display: grid;
 		grid-template-columns: repeat(5, minmax(0, 1fr));
 		gap: 4px;
-		min-height: calc(58px + env(safe-area-inset-bottom, 0px));
-		padding: 6px 7px calc(6px + env(safe-area-inset-bottom, 0px));
+		min-height: 58px;
+		padding: 6px 7px;
 		border: 1px solid rgba(15, 155, 142, 0.16);
 		border-radius: 18px;
 		background: rgba(255, 255, 255, 0.9);
 		box-shadow: 0 16px 40px rgba(15, 23, 42, 0.16);
 		backdrop-filter: blur(18px);
+		transform: translateY(0);
+		transition:
+			opacity 0.22s ease,
+			transform 0.22s ease;
+		will-change: transform;
+	}
+
+	.mobile-bottom-nav.is-hidden {
+		opacity: 0;
+		pointer-events: none;
+		transform: translateY(calc(100% + 20px + env(safe-area-inset-bottom, 0px)));
 	}
 
 	.mobile-bottom-nav button {

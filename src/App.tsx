@@ -359,6 +359,7 @@ export function App() {
 		useState<ServiceWorkerRegistration | null>(null);
 	const [showInstallHint, setShowInstallHint] = useState(false);
 	const [isStandalone, setIsStandalone] = useState(isStandaloneDisplay);
+	const [bottomNavHidden, setBottomNavHidden] = useState(false);
 
 	const daily = useApi<DailyNews>(
 		apiBase,
@@ -519,7 +520,9 @@ export function App() {
 	useEffect(() => registerServiceWorker(setServiceWorkerUpdate), []);
 
 	useEffect(() => {
-		setShowInstallHint(shouldShowIosInstallHint());
+		const dismissed =
+			readStoredValue(STORAGE_KEYS.iosInstallHintDismissed, "false") === "true";
+		setShowInstallHint(!dismissed && shouldShowIosInstallHint());
 	}, []);
 
 	useEffect(() => {
@@ -657,6 +660,41 @@ export function App() {
 				: "top"
 			: mobileNavMode;
 
+	useEffect(() => {
+		if (resolvedMobileNav !== "bottom") {
+			setBottomNavHidden(false);
+			return;
+		}
+
+		let lastScrollY = window.scrollY;
+		let ticking = false;
+
+		const updateNavVisibility = () => {
+			const currentScrollY = window.scrollY;
+			const delta = currentScrollY - lastScrollY;
+
+			if (currentScrollY < 80) {
+				setBottomNavHidden(false);
+			} else if (delta > 12) {
+				setBottomNavHidden(true);
+			} else if (delta < -12) {
+				setBottomNavHidden(false);
+			}
+
+			lastScrollY = currentScrollY;
+			ticking = false;
+		};
+
+		const handleScroll = () => {
+			if (ticking) return;
+			ticking = true;
+			window.requestAnimationFrame(updateNavVisibility);
+		};
+
+		window.addEventListener("scroll", handleScroll, { passive: true });
+		return () => window.removeEventListener("scroll", handleScroll);
+	}, [resolvedMobileNav]);
+
 	const reloadAll = () => {
 		daily.reload();
 		weather.reload();
@@ -715,7 +753,10 @@ export function App() {
 					applyServiceWorkerUpdate(serviceWorkerUpdate);
 					setServiceWorkerUpdate(null);
 				}}
-				onDismissInstallHint={() => setShowInstallHint(false)}
+				onDismissInstallHint={() => {
+					writeStoredValue(STORAGE_KEYS.iosInstallHintDismissed, "true");
+					setShowInstallHint(false);
+				}}
 			/>
 
 			<main>
@@ -853,6 +894,7 @@ export function App() {
 					activePage={activePage}
 					setActivePage={setActivePage}
 					variant="bottom"
+					hidden={bottomNavHidden}
 				/>
 			)}
 		</div>

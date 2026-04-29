@@ -7,14 +7,16 @@ export function MobileNav({
 	activePage,
 	setActivePage,
 	variant,
+	hidden = false,
 }: {
 	activePage: PageId;
 	setActivePage: (page: PageId) => void;
 	variant: "bottom" | "top";
+	hidden?: boolean;
 }) {
 	return (
 		<nav
-			className={`mobile-nav mobile-${variant}-nav`}
+			className={`mobile-nav mobile-${variant}-nav ${hidden ? "is-hidden" : ""}`}
 			aria-label="移动端主导航"
 		>
 			{nav

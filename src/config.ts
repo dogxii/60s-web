@@ -41,6 +41,7 @@ export const STORAGE_KEYS = {
 	chromeTheme: "60s-web:chrome-theme",
 	colorTheme: "60s-web:color-theme",
 	mobileNavMode: "60s-web:mobile-nav-mode",
+	iosInstallHintDismissed: "60s-web:ios-install-hint-dismissed",
 	homeCardLayout: "60s-web:home-card-layout",
 	endpointFavorites: "60s-web:endpoint-favorites",
 	quickFavorites: "60s-web:quick-favorites",
