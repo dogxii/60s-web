@@ -144,6 +144,11 @@ export function Footer({ apiBase, updatedAt }: { apiBase: string; updatedAt?: Da
 						<strong>版本</strong>v{packageInfo.version}
 					</span>
 					<span className="footer-dot" />
+					<span className="footer-meta">
+						<strong>PWA</strong>
+						可安装
+					</span>
+					<span className="footer-dot" />
 					<span className="footer-meta runtime">
 						<strong>缓存</strong>
 						10 分钟

@@ -37,6 +37,7 @@ import { Header } from "./components/Header";
 import { HotPage } from "./components/Hot";
 import { MarketStrip } from "./components/HomeCards";
 import { HomePage } from "./components/HomePage";
+import { MobileBottomNav } from "./components/MobileBottomNav";
 import { NewsPage } from "./components/News";
 import { SettingsPanel } from "./components/SettingsPanel";
 import { ToolWorkspace } from "./components/ToolWorkspace";
@@ -718,6 +719,7 @@ export function App() {
 			</main>
 
 			<Footer apiBase={apiBase} updatedAt={daily.updatedAt} />
+			<MobileBottomNav activePage={activePage} setActivePage={setActivePage} />
 		</div>
 	);
 }

@@ -1,0 +1,33 @@
+{
+  "name": "60s 信息聚合",
+  "short_name": "60s",
+  "description": "聚合每日简报、热榜、天气、实用数据和工具的轻量 PWA。",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#f6f8f8",
+  "theme_color": "#ffffff",
+  "icons": [
+    {
+      "src": "/pwa-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/pwa-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/pwa-icon-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "categories": ["news", "utilities", "productivity"],
+  "lang": "zh-CN"
+}

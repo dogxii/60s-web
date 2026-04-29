@@ -2,6 +2,7 @@ import {
 	Moon,
 	RotateCcw,
 	Save,
+	Settings,
 	Sun,
 	Upload,
 	UserRound,
@@ -127,6 +128,14 @@ export function Header({
 				})}
 			</nav>
 			<div className="header-actions">
+				<button
+					className="settings-shortcut"
+					type="button"
+					aria-label="打开设置"
+					onClick={() => setActivePage("settings")}
+				>
+					<Settings size={18} />
+				</button>
 				<button
 					className="theme-toggle"
 					type="button"
